@@ -8,15 +8,17 @@ let auth;
 
 const discordSdk = new DiscordSDK(import.meta.env.VITE_DISCORD_CLIENT_ID);
 
-$().ready(() => {
+$().on(() => {
 	// start loading indicator
 	$("#loading").show();
-})
+});
 
 setupDiscordSdk().then(async () => {
 	console.log("Discord SDK is authenticated");
 	// stop loading indicator
-	$("#loading").hide();
+	$("#loading").fadeOut(() => {
+		$("#loading").remove();
+	});
 	// connect to backend ws
 	const ws = new WebSocket(`wss://${window.location.host}/.proxy/api/ws`);
 	ws.onopen = () => {
@@ -62,3 +64,13 @@ async function setupDiscordSdk() {
 		throw new Error("Authenticate command failed");
 	}
 }
+
+
+// Fetch
+const participants = await discordSdk.commands.getInstanceConnectedParticipants();
+
+// Subscribe
+function updateParticipants(participants) {
+  // Do something really cool
+}
+discordSdk.subscribe(Events.ACTIVITY_INSTANCE_PARTICIPANTS_UPDATE, updateParticipants);

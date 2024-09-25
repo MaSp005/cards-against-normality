@@ -1,15 +1,38 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Hello, World</title>
-  </head>
-  <body>
-    <div id="app">
-      <div id="loading"></div>
-    </div>
-    <script type="module" src="/main.js"></script>
-  </body>
+
+<head>
+	<meta charset="UTF-8" />
+	<link rel="icon" type="image/svg+xml" href="/vite.svg" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+	<title>Hello, World</title>
+	<style>
+		body {
+			font-family: Inter, system-ui, Arial, sans-serif;
+      color: white;
+		}
+
+		#loading {
+			position: absolute;
+			display: flex;
+			justify-content: center;
+			align-items: center;
+			top: 0;
+			left: 0;
+			bottom: 0;
+			right: 0;
+			background-color: #1d1d1d;
+		}
+	</style>
+</head>
+
+<body>
+	<div id="loading">
+		<h1>Loading...</h1>
+	</div>
+	<div id="app">
+	</div>
+	<script type="module" src="/main.js"></script>
+</body>
+
 </html>
