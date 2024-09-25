@@ -1,0 +1,8 @@
+.vscode
+node_modules
+package_lock.json
+output
+*.log
+.DS_Store
+tmp
+*.tsbuildinfo
