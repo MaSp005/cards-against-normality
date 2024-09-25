@@ -1,5 +1,5 @@
 {
-  "name": "getting-started-activity",
+  "name": "cards-against-normality",
   "private": true,
   "version": "0.0.0",
   "type": "module",
@@ -10,5 +10,8 @@
   },
   "devDependencies": {
     "vite": "^5.0.8"
+  },
+  "dependencies": {
+    "@discord/embedded-app-sdk": "^1.4.2"
   }
 }
