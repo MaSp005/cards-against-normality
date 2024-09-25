@@ -1,6 +1,6 @@
 # Cards Against Normality
 
-**Cards Against Normality** is a cheap rip-off of **Cards Against Humanity**, inspired by the humor and fun of **Cards Against Formality**. This project aims to bring the spirit of these games into the world of Discord Activities, allowing friends and communities to enjoy the chaos and laughter that comes with this card game.
+**Cards Against Normality** is a cheap rip-off of **Cards Against Humanity**, inspired by **Cards Against Formality**. This project aims to bring the spirit of these games into the world of Discord Activities, allowing friends and communities to enjoy the chaos and laughter that comes with this card game.
 
 For more details on the original game, check out:
 - [Cards Against Humanity](https://www.cardsagainsthumanity.com/)
