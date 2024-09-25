@@ -6,3 +6,5 @@ output
 .DS_Store
 tmp
 *.tsbuildinfo
+dist
+.env
