@@ -1,16 +1,17 @@
 import express from "express";
 import dotenv from "dotenv";
 import fetch from "node-fetch";
+import expressWs from "express-ws";
+
 dotenv.config({ path: "../.env" });
 
 const app = express();
 const port = 3001;
 
-// Allow express to parse JSON bodies
+expressWs(app);
 app.use(express.json());
 
 app.post("/api/token", async (req, res) => {
-	// Exchange the code for an access_token
 	const response = await fetch(`https://discord.com/api/oauth2/token`, {
 		method: "POST",
 		headers: {
@@ -24,11 +25,27 @@ app.post("/api/token", async (req, res) => {
 		}),
 	});
 
-	// Retrieve the access_token from the response
 	const { access_token } = await response.json();
 
-	// Return the access_token to our client as { access_token: "..."}
 	res.send({ access_token });
+});
+app.ws("/api/ws", (ws) => {
+	console.log("WebSocket connected");
+	ws.on("message", (msg) => {
+		console.log(msg);
+	});
+	ws.on("close", () => {
+		console.log("WebSocket closed");
+	});
+	ws.on("error", (err) => {
+		console.error(err);
+	});
+	ws.on("ping", () => {
+		console.log("WebSocket ping");
+	});
+	ws.on("pong", () => {
+		console.log("WebSocket pong");
+	});
 });
 
 app.listen(port, () => {
