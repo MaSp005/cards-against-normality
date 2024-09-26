@@ -23,27 +23,30 @@ setupDiscordSdk().then(async () => {
 	console.log("Discord SDK is authenticated");
 	// console.log(auth);
 
-	$("#loading p").text("Connecting to the socket server...");
+	$("#loading-info").text("Connecting to the socket server...");
 	// Connect to the socket server
 	socket = io("https://" + import.meta.env.VITE_DISCORD_CLIENT_ID + ".discordsays.com", {
 		path: "/.proxy/socket.io",
-		transports: ["websocket", "polling"],
+		transports: ["polling", "websocket"],
 		cors: {
 			origin: "https://" + import.meta.env.VITE_DISCORD_CLIENT_ID + ".discordsays.com/ ",
 		},
 		query: {
 			instanceId: discordSdk.instanceId,
+			user: JSON.stringify(auth.user),
 		},
 	});
 
 	socket.on("connect", () => {
 		console.log("Socket connected");
-	$("#loading p").text("Connected!");
+		$("#loading-info").text("Connected!");
 
 		// Hide loading indicator
-		$("#loading").fadeOut(() => {
-			$("#loading").remove();
-		});
+		setTimeout(() => {
+			$("#loading").fadeOut(() => {
+				$(".destroy_afer_load").remove();
+			});
+		}, 5000);
 	});
 });
 

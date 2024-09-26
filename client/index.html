@@ -5,32 +5,160 @@
 	<meta charset="UTF-8" />
 	<link rel="icon" type="image/svg+xml" href="/vite.svg" />
 	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-	<title>Hello, World</title>
-	<style>
+	<title>Cards Against Normality</title>
+	<style class="destroy_afer_load">
 		body {
 			font-family: Inter, system-ui, Arial, sans-serif;
-      color: white;
+			background-color: #131417;
+			color: white;
+			user-select: none;
+		}
+
+		@keyframes rotateCard {
+			from {
+				transform: rotateZ(10deg) rotateY(0deg);
+			}
+
+			to {
+				transform: rotateZ(10deg) rotateY(360deg);
+			}
+		}
+
+		@keyframes bounceCard {
+
+			0%,
+			100% {
+				transform: translateY(32px);
+			}
+
+			50% {
+				transform: translateY(16px);
+			}
 		}
 
 		#loading {
 			position: absolute;
-			display: flex;
-			justify-content: center;
-			align-items: center;
-			flex-direction: column;
 			top: 0;
 			left: 0;
 			bottom: 0;
 			right: 0;
-			background-color: #1d1d1d;
+			display: flex;
+			flex-direction: column;
+			justify-content: center;
+			align-items: center;
+			height: 100vh;
+			gap: 16px;
+
+			& #loading-info {
+				margin-top: 32px;
+				font-size: 32px;
+				font-weight: 900;
+				text-wrap: nowrap;
+			}
+
+			& .card-wrapper {
+				transform: translateY(-50px);
+			}
+
+			& .card {
+				perspective: 1000px;
+				animation: bounceCard 7.5s infinite ease;
+
+			}
+
+			& .card-inner {
+				position: relative;
+				width: 100%;
+				height: 100%;
+				transform-style: preserve-3d;
+				transform-origin: center;
+				transition: transform 1s;
+				animation: rotateCard 20s infinite linear;
+			}
+
+			& .card-front,
+			& .card-back {
+				position: absolute;
+				width: 100%;
+				height: 100%;
+				backface-visibility: hidden;
+			}
+
+			& .card-front img,
+			& .card-back img {
+				height: 100%;
+				object-fit: cover;
+			}
+
+			& .card-back {
+				transform: rotateY(180deg);
+			}
+
+			& .card {
+				width: 250px;
+				height: 375px;
+				border-radius: 16px;
+
+				& h1 {
+					position: absolute;
+					top: 25px;
+					left: 0;
+					right: 0;
+					font-size: 24px;
+					font-weight: 900;
+					margin: 0;
+					padding-inline: 20px;
+					text-wrap: pretty;
+				}
+
+				& h2 {
+					position: absolute;
+					bottom: 0px;
+					left: 20px;
+					font-size: 12px;
+					font-weight: 900;
+					margin: 0;
+					margin-bottom: 16px;
+					padding: 0;
+				}
+
+				&.black {
+					background-color: #231F20;
+					color: #D9D9D9;
+				}
+
+				&.white {
+					background-color: #D9D9D9;
+					color: #231F20;
+				}
+			}
 		}
 	</style>
 </head>
 
 <body>
-	<div id="loading">
-		<h1>Loading...</h1>
-		<p>Connecting to Discord OAuth2...</p>
+	<div id="loading" class="destroy_afer_load">
+		<div class="card-wrapper">
+			<div class="card">
+				<div class="card-inner">
+					<div class="card-front">
+						<div class="card black">
+							<h1>TSA guidelines now prohibit _____ on airplanes.</h1>
+							<h2>Cards Against Normality</h2>
+						</div>
+						<!-- <img src="https://i.imgur.com/SulT30L.png" alt="Black Card"> -->
+					</div>
+					<div class="card-back">
+						<div class="card white">
+							<h1>Not wearing pants.</h1>
+							<h2>Cards Against Normality</h2>
+						</div>
+						<!-- <img src="https://i.imgur.com/ttymjY1.png" alt="White Card"> -->
+					</div>
+				</div>
+			</div>
+		</div>
+		<h1 id="loading-info">Authenticating with Discord...</h1>
 	</div>
 	<div id="app">
 	</div>
