@@ -1,6 +1,6 @@
 /**
  * Room Class
- * @prop {Array} players Array of player sockets
+ * @prop {Object.<string, string[]>} cards Map of user ids to card array
  * @prop {Boolean} isdemocracy Whether or not this room has enabled democracy mode
  * @prop {{
  *   stage: String,
@@ -10,7 +10,10 @@
  * }} gamestate Game State Object
  */
 export class Room {
-	players = [];
+	#io;
+	name;
+  vip;
+	cards = {};
 	isdemocracy = false;
 	gamestate = {
 		stage: "LOBBY",
@@ -19,13 +22,26 @@ export class Room {
 		cycle: 0,
 	};
 
-	constructor() {}
-
-	join(socket) {
-		this.players.push(socket);
+	constructor(io, name, user) {
+		this.#io = io;
+		this.name = name;
+    this.setVIP(user);
 	}
-	leave(socket) {
-		if (!this.players.includes(socket)) return;
-		this.players.splice(this.players.indexOf(socket));
+
+	toJSON() {
+		return {
+			isdemocracy: this.isdemocracy,
+			gamestate: this.gamestate,
+		};
+	}
+
+  setVIP(user) {
+		this.vip = user.user.id;
+		this.#io.in(this.name).emit("NEW_VIP", this.vip);
+	}
+
+	startGame() {
+		// this.cards;
+		this.#io.in(this.name).emit("TO_SCREEN", "CARD_PREVIEW");
 	}
 }

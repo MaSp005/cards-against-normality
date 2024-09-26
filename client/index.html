@@ -6,10 +6,19 @@
 	<link rel="icon" type="image/svg+xml" href="/vite.svg" />
 	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 	<title>Cards Against Normality</title>
+	<style>
+		:root {
+			--col-bg: #272727;
+			--col-bg-alt: #131417;
+			--col-dark: #231F20;
+			--col-light: #D9D9D9;
+			--col-light-alt: #A5A5A5;
+		}
+	</style>
 	<style class="destroy_afer_load">
 		body {
 			font-family: Inter, system-ui, Arial, sans-serif;
-			background-color: #131417;
+			background-color: var(--col-bg-alt);
 			color: white;
 			user-select: none;
 		}
@@ -38,6 +47,7 @@
 
 		#loading {
 			position: absolute;
+			z-index: 99;
 			top: 0;
 			left: 0;
 			bottom: 0;
@@ -48,6 +58,7 @@
 			align-items: center;
 			height: 100vh;
 			gap: 16px;
+			background-color: var(--col-bg-alt);
 
 			& #loading-info {
 				margin-top: 32px;
@@ -60,12 +71,6 @@
 				transform: translateY(-50px);
 			}
 
-			& .card {
-				perspective: 1000px;
-				animation: bounceCard 7.5s infinite ease;
-
-			}
-
 			& .card-inner {
 				position: relative;
 				width: 100%;
@@ -73,7 +78,7 @@
 				transform-style: preserve-3d;
 				transform-origin: center;
 				transition: transform 1s;
-				animation: rotateCard 20s infinite linear;
+				animation: rotateCard 12.5s infinite linear;
 			}
 
 			& .card-front,
@@ -94,7 +99,9 @@
 				transform: rotateY(180deg);
 			}
 
-			& .card {
+			& .lcard {
+				perspective: 1000px;
+				animation: bounceCard 7.5s infinite ease;
 				width: 250px;
 				height: 375px;
 				border-radius: 16px;
@@ -123,13 +130,13 @@
 				}
 
 				&.black {
-					background-color: #231F20;
-					color: #D9D9D9;
+					background-color: var(--col-dark);
+					color: var(--col-light);
 				}
 
 				&.white {
-					background-color: #D9D9D9;
-					color: #231F20;
+					background-color: var(--col-light);
+					color: var(--col-dark);
 				}
 			}
 		}
@@ -139,17 +146,17 @@
 <body>
 	<div id="loading" class="destroy_afer_load">
 		<div class="card-wrapper">
-			<div class="card">
+			<div class="lcard">
 				<div class="card-inner">
 					<div class="card-front">
-						<div class="card black">
+						<div class="lcard black">
 							<h1>TSA guidelines now prohibit _____ on airplanes.</h1>
 							<h2>Cards Against Normality</h2>
 						</div>
 						<!-- <img src="https://i.imgur.com/SulT30L.png" alt="Black Card"> -->
 					</div>
 					<div class="card-back">
-						<div class="card white">
+						<div class="lcard white">
 							<h1>Not wearing pants.</h1>
 							<h2>Cards Against Normality</h2>
 						</div>
@@ -161,6 +168,53 @@
 		<h1 id="loading-info">Authenticating with Discord...</h1>
 	</div>
 	<div id="app">
+		<div class="screen lobby">
+			<h1>LOBBY</h1>
+			<div class="menu">
+				<div class="button btn1">
+					<h2>PACKS</h1>
+				</div>
+				<div class="button btn2">
+					<h2>SETTINGS</h2>
+				</div>
+				<div class="button btn3">
+					<h1>START</h1>
+				</div>
+				<div class="button btn4">
+					<h2>HELP</h2>
+				</div>
+				<div class="button btn5">
+					<h2>CREDITS</h2>
+				</div>
+			</div>
+		</div>
+		<div class="screen cards">
+			<h1>CARDS</h1>
+		</div>
+		<div class="screen black_pick">
+			<h1>BLACK_PICK</h1>
+		</div>
+		<div class="screen white_pick">
+			<h1>WHITE_PICK</h1>
+		</div>
+		<div class="screen present">
+			<h1>PRESENT</h1>
+		</div>
+		<div class="screen winner_pick">
+			<h1>WINNER_PICK</h1>
+		</div>
+		<div class="screen winner">
+			<h1>WINNER</h1>
+		</div>
+		<div class="screen intermediate">
+			<h1>INTERMEDIATE</h1>
+		</div>
+		<div class="screen end">
+			<h1>END</h1>
+		</div>
+		<div class="screen dump">
+			<h1>DUMP</h1>
+		</div>
 	</div>
 	<script type="module" src="/main.js"></script>
 </body>

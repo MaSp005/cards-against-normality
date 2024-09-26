@@ -24,11 +24,10 @@ instrument(io, {
 	mode: "development",
 });
 
-
 const rooms = {};
-function getRoom(id) {
+function getRoom(id, arg) {
 	if (id in rooms) return rooms[id];
-	else return (rooms[id] = new Room());
+	else return (rooms[id] = new Room(io, id, arg));
 }
 
 const app = express();
@@ -63,12 +62,32 @@ io.on("connection", (socket) => {
 	// console.log(socket.handshake.query)
 	// put into room based on instanceId
 	socket.join(socket.handshake.query.instanceId);
-	getRoom(socket.handshake.query.instanceId).join(socket);
 	socket.user = JSON.parse(socket.handshake.query.user);
+	socket.connected = new Date(socket.handshake.time).getTime();
+	socket.emit("JOIN_DATA", getRoom(socket.handshake.query.instanceId, socket).toJSON());
 	console.log(`@${socket.user.username} connected`);
+
 	socket.on("disconnect", () => {
-		socket.leave(socket.handshake.query.instanceId);
-		getRoom(socket.handshake.query.instanceId).leave(socket);
 		console.log(`@${socket.user.username} disconnected`);
+		let room = getRoom(socket.handshake.query.instanceId);
+		socket.leave(room.name);
+		if (!io.sockets.adapter.rooms.get(room.name)?.size) {
+			delete rooms[socket.handshake.query.instanceId];
+			console.log(`-> Room ${room.name} deleted.`);
+			return;
+		}
+		if (room.vip == socket.user.id) {
+			io.of("/")
+				.in(room.name)
+				.fetchSockets()
+				.then((clients) => {
+					if (!Array.isArray(clients)) clients = [clients];
+					let min = Math.min(...clients.map((c) => c.connected));
+					let newvipidx = clients.findIndex((c) => c.connected == min);
+					let newvip = clients.find((c) => c.connected == min);
+					room.setVIP(newvip);
+					console.log(`-> Made @${newvip.user.username} new VIP.`);
+				});
+		}
 	});
 });

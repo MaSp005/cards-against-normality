@@ -1,14 +1,8 @@
-:root {
-	--background: #131417;
-	--dark: #231f20;
-	--light: #d9d9d9;
-	/* --light_accent: #A5A5A5; */
-}
-
 body {
+	overflow: hidden;
 	font-family: Inter, system-ui, Arial, sans-serif;
 	user-select: none;
-	background-color: var(--background);
+	background-color: var(--col-bg-alt);
 	color: white;
 
 	padding: 0;
@@ -26,4 +20,135 @@ body {
 	width: 100%;
 	height: 100%;
 	text-align: center;
+
+	& > .screen {
+		display: none;
+		position: absolute;
+		top: 0;
+		left: 0;
+		width: 100%;
+		height: 100%;
+		background: var(--col-bg-alt);
+	}
+}
+
+.card {
+	transform: scale(0.5);
+	background-color: var(--col-bg);
+	border-radius: 35px;
+	width: 500px;
+	height: 750px;
+	&.white {
+		background: var(--col-light);
+		color: var(--col-dark);
+	}
+	&.black {
+		background: var(--col-dark);
+		color: var(--col-light);
+	}
+	& h1 {
+		position: absolute;
+		top: 20px;
+		margin-inline: 40px;
+		font-size: 48px;
+		font-weight: 900;
+		text-align: left;
+		text-wrap: pretty;
+	}
+	& h2 {
+		position: absolute;
+		top: 20px;
+		left: 0;
+		right: 0;
+		margin-inline: 40px;
+		font-size: 48px;
+		font-weight: 900;
+		text-align: center;
+		text-wrap: pretty;
+	}
+	& h3 {
+		position: absolute;
+		top: 20px;
+		left: 0;
+		right: 0;
+		margin-inline: 40px;
+		font-size: 42px;
+		font-weight: 900;
+		text-align: center;
+		text-wrap: pretty;
+	}
+	& p {
+		position: absolute;
+		bottom: 20px;
+		margin-inline: 40px;
+		font-size: 24px;
+		font-weight: 900;
+		text-align: left;
+		text-wrap: nowrap;
+	}
+}
+
+/* LOBBY */
+
+.screen.lobby {
+  background-position: center !important;
+  background-size: cover !important;
+  /* background-blend-mode: multiply !important; */
+	& .menu {
+		position: absolute;
+		display: flex;
+		flex-direction: row;
+		justify-content: center;
+		align-items: center;
+		left: 0;
+		right: 0;
+		bottom: 0;
+		width: calc(100% - 2 * 100px);
+		margin-inline: auto;
+		gap: 16px;
+		& .button {
+			width: 100%;
+			height: 150px;
+			background: var(--col-light);
+			color: var(--col-dark);
+			border-radius: 16px 16px 0 0;
+			font-size: 16px;
+			cursor: pointer;
+			transition: transform 0.2s ease;
+			& h1 {
+				margin-top: 12px;
+				font-size: 36px;
+				font-weight: 900;
+				vertical-align: text-top;
+			}
+			& h2 {
+				font-size: 24px;
+				font-weight: 900;
+				vertical-align: text-top;
+			}
+
+			&.btn1,
+			&.btn5 {
+				transform: translateY(50px);
+				&:hover {
+					transform: translateY(40px);
+				}
+			}
+
+			&.btn2,
+			&.btn4 {
+				transform: translateY(40px);
+				&:hover {
+					transform: translateY(30px);
+				}
+			}
+
+			&.btn3 {
+				transform: translateY(30px);
+				&:hover {
+					transform: translateY(20px);
+				}
+			}
+		}
+	}
 }
