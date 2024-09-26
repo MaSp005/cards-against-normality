@@ -1,14 +1,15 @@
 import express from "express";
 import dotenv from "dotenv";
 import fetch from "node-fetch";
-import expressWs from "express-ws";
+import { Server } from "socket.io";
 
 dotenv.config({ path: "../.env" });
+
+const io = new Server(3002, {});
 
 const app = express();
 const port = 3001;
 
-expressWs(app);
 app.use(express.json());
 
 app.post("/api/token", async (req, res) => {
@@ -29,25 +30,12 @@ app.post("/api/token", async (req, res) => {
 
 	res.send({ access_token });
 });
-app.ws("/api/ws", (ws) => {
-	console.log("WebSocket connected");
-	ws.on("message", (msg) => {
-		console.log(msg);
-	});
-	ws.on("close", () => {
-		console.log("WebSocket closed");
-	});
-	ws.on("error", (err) => {
-		console.error(err);
-	});
-	ws.on("ping", () => {
-		console.log("WebSocket ping");
-	});
-	ws.on("pong", () => {
-		console.log("WebSocket pong");
-	});
-});
 
 app.listen(port, () => {
 	console.log(`Server listening at http://localhost:${port}`);
+});
+
+io.on("connection", (socket) => {
+	// put into room based on instanceId
+	socket.join(socket.handshake.query.instanceId);
 });

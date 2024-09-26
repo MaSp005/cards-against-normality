@@ -1,12 +1,18 @@
 import { DiscordSDK } from "@discord/embedded-app-sdk";
 import $ from "jquery";
+import io from "socket.io-client";
 window.$ = $;
 
 import "./style.css";
 
 let auth;
+let socket;
 
-const discordSdk = new DiscordSDK(import.meta.env.VITE_DISCORD_CLIENT_ID);
+const discordSdk = new DiscordSDK(import.meta.env.VITE_DISCORD_CLIENT_ID, {
+	// disableConsoleLogOverride: true,
+});
+
+// INITIALIZE
 
 $().on(() => {
 	// start loading indicator
@@ -15,23 +21,33 @@ $().on(() => {
 
 setupDiscordSdk().then(async () => {
 	console.log("Discord SDK is authenticated");
-	// stop loading indicator
-	$("#loading").fadeOut(() => {
-		$("#loading").remove();
+	// console.log(auth);
+
+	$("#loading p").text("Connecting to the socket server...");
+	// Connect to the socket server
+	socket = io("https://" + import.meta.env.VITE_DISCORD_CLIENT_ID + ".discordsays.com", {
+		path: "/.proxy/socket.io",
+		transports: ["websocket", "polling"],
+		cors: {
+			origin: "https://" + import.meta.env.VITE_DISCORD_CLIENT_ID + ".discordsays.com/ ",
+		},
+		query: {
+			instanceId: discordSdk.instanceId,
+		},
 	});
-	// connect to backend ws
-	const ws = new WebSocket(`wss://${window.location.host}/.proxy/api/ws`);
-	ws.onopen = () => {
-		// initial message with lobby id (channel id)
-		let channelId = discordSdk.channelId;
-		ws.send(
-			JSON.stringify({
-				lobbyId: channelId,
-			})
-		);
-		console.log("WebSocket connected");
-	};
+
+	socket.on("connect", () => {
+		console.log("Socket connected");
+	$("#loading p").text("Connected!");
+
+		// Hide loading indicator
+		$("#loading").fadeOut(() => {
+			$("#loading").remove();
+		});
+	});
 });
+
+// HELPER FUNCTIONS
 
 async function setupDiscordSdk() {
 	await discordSdk.ready();
@@ -64,13 +80,3 @@ async function setupDiscordSdk() {
 		throw new Error("Authenticate command failed");
 	}
 }
-
-
-// Fetch
-const participants = await discordSdk.commands.getInstanceConnectedParticipants();
-
-// Subscribe
-function updateParticipants(participants) {
-  // Do something really cool
-}
-discordSdk.subscribe(Events.ACTIVITY_INSTANCE_PARTICIPANTS_UPDATE, updateParticipants);
