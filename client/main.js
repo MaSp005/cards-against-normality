@@ -1,9 +1,9 @@
 import { DiscordSDK } from "@discord/embedded-app-sdk";
-import $ from "jquery";
 import io from "socket.io-client";
-window.$ = $;
+// import $ from "jquery";
+// window.$ = $;
 
-import "./style.css";
+// import "./style.css";
 
 import logoFull from "./src/img/logo_cards_full.png";
 import splashBackground from "./src/img/splash_dark.png";
@@ -11,224 +11,323 @@ import splashBackground from "./src/img/splash_dark.png";
 let auth;
 let socket;
 let gamestate;
+let currentvip;
 let mycards = [];
 
 const discordSdk = new DiscordSDK(import.meta.env.VITE_DISCORD_CLIENT_ID, {
-	// disableConsoleLogOverride: true,
+  // disableConsoleLogOverride: true,
 });
 
 // INITIALIZE
 
 $(() => {
-	// show loading indicator
-	$("#loading").show();
+  // show loading indicator
+  $("#loading").show();
 
-	// set images
-	// $(".scren.lobby .logo img").attr("src", logoFull);
-	$(".screen.lobby").css("background-image", `url(${splashBackground})`);
-})
-
-setupDiscordSdk().then(async () => {
-	console.log("Discord SDK is authenticated");
-	// console.log(auth);
-
-	$("#loading-info").text("Connecting to the socket server...");
-	// Connect to the socket server
-	socket = io("https://" + import.meta.env.VITE_DISCORD_CLIENT_ID + ".discordsays.com", {
-		path: "/.proxy/socket.io",
-		transports: ["polling", "websocket"],
-		cors: {
-			origin: "https://" + import.meta.env.VITE_DISCORD_CLIENT_ID + ".discordsays.com/ ",
-		},
-		query: {
-			instanceId: discordSdk.instanceId,
-			user: JSON.stringify(auth.user),
-		},
-	});
-
-	socket.on("connect", () => {
-		console.log("Socket connected");
-		$("#loading-info").text("Connected!");
-
-		// Hide loading indicator
-		setTimeout(() => {
-			goToLobby();
-			$("#loading").fadeOut(() => {
-				$(".destroy_afer_load").remove();
-			});
-		}, 1500); //5000
-	});
-
-	socket.once("JOIN_DATA", (g) => {
-		gamestate = g;
-		goTo(g.gamestate.stage);
-	});
-
-	socket.on("YOUR_CARDS", (c) => {
-		mycards = c;
-	});
-
-	socket.on("NEW_VIP", (c) => {
-		// mark user as vip, refresh display
-	});
-
-	socket.on("BLACK_OPTIONS", (d) => {
-		goToBlackPick(d);
-	});
-
-	socket.on("BLACK_PROMPT", (d) => {
-		goToWhitePick(d);
-	});
-
-	socket.on("WHITE_PRESENT", (d) => {
-		// goToPresent();
-	});
-
-	socket.on("WHITE_OPTIONS", (d) => {
-		goToWinnerPick(d);
-	});
-
-	socket.on("WINNER", (d) => {
-		goToWinner(d);
-	});
-
-	socket.on("TO_SCREEN", (s) => {
-		goTo(s);
-	});
-
-	try {
-		discordSdk.subscribe("ACTIVITY_INSTANCE_PARTICIPANTS_UPDATE", updateParticipants);
-		updateParticipants(await discordSdk.commands.getInstanceConnectedParticipants());
-	} catch (e) {
-		console.log(e);
-	}
+  // set images
+  // $(".scren.lobby .logo img").attr("src", logoFull);
+  $(".screen.lobby").css("background-image", `url(${splashBackground})`);
+  // HELP BUTTON (SUPPORT SERVER)
+  $(".screen.lobby .btn4").on("click", () => {
+    fetch("https://discord.com/api/guilds/972847626053627934/widget.json", {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        console.log(data);
+        discordSdk.commands.openExternalLink({
+          url: data.instant_invite,
+        });
+      })
+      .catch((error) => {
+        console.error("Error fetching data:", error);
+      });
+  });
 });
 
-// HELPER FUNCTIONS
+setupDiscordSdk().then(async () => {
+  console.log("Discord SDK is authenticated");
+  // console.log(auth);
+
+  $("#loading-info").text("Connecting to the socket server...");
+  // Connect to the socket server
+  socket = io(
+    "https://" + import.meta.env.VITE_DISCORD_CLIENT_ID + ".discordsays.com",
+    {
+      path: "/.proxy/socket.io",
+      transports: ["polling", "websocket"],
+      cors: {
+        origin:
+          "https://" +
+          import.meta.env.VITE_DISCORD_CLIENT_ID +
+          ".discordsays.com/ ",
+      },
+      query: {
+        instanceId: discordSdk.instanceId,
+        user: JSON.stringify(auth.user),
+      },
+    }
+  );
+
+  socket.on("connect", async () => {
+    console.log("Socket connected");
+    $("#loading-info").text("Press the button below to start playing!");
+
+    // Hide loading indicator
+    $("#loading .btn.play").attr("disabled", false);
+
+    // $("#loading .lcard").on("click", () => {
+    $("#loading .btn.play").on("click", async () => {
+      $("#loading .btn.play").addClass("active");
+      await new Promise((res) => setTimeout(res, 250));
+      goToLobby();
+      $("#loading").slideUp(() => {
+        $(".destroy_afer_load").remove();
+      });
+    });
+  });
+
+  // DOM EVENTS
+
+  // TODO: disable if not vip
+  $(".screen.lobby .btn3").click(() => {
+    console.log("Start game pls.");
+    socket.emit("CONTINUE");
+  });
+
+  // SOCKET EVENTS
+
+  socket_events: {
+    socket.once("JOIN_DATA", (g) => {
+      gamestate = g;
+      goTo(g.gamestate.stage);
+    });
+
+    socket.on("YOUR_CARDS", (c) => {
+      console.log(c);
+      mycards = c;
+    });
+
+    socket.on("NEW_VIP", async (c) => {
+      console.log("NEW VIP:", c, c == auth.user.id, auth.user.id);
+      currentvip = c;
+
+      // (de)activate menu start button
+      $(".screen.lobby .btn3").toggleClass("disabled", c != auth.user.id);
+      $(".screen.lobby .btn3").attr(
+        "title",
+        c == auth.user.id
+          ? "Click to start the game!"
+          : "Only the VIP can start the game."
+      );
+
+      // update player list
+      $(".players div").removeClass("vip");
+      $(`.players div[data-userid="${c}"]`).addClass("vip");
+    });
+
+    socket.on("BLACK_OPTIONS", (d) => {
+      goToBlackPick(d);
+    });
+
+    socket.on("BLACK_PROMPT", (d) => {
+      goToWhitePick(d);
+    });
+
+    socket.on("WHITE_PRESENT", (d) => {
+      // goToPresent();
+    });
+
+    socket.on("WHITE_OPTIONS", (d) => {
+      goToWinnerPick(d);
+    });
+
+    socket.on("WINNER", (d) => {
+      goToWinner(d);
+    });
+
+    socket.on("TO_SCREEN", (s) => {
+      goTo(s);
+    });
+  }
+
+  try {
+    await discordSdk.subscribe("ACTIVITY_INSTANCE_PARTICIPANTS_UPDATE", (d) =>
+      updateParticipants(d.participants)
+    );
+    updateParticipants(
+      (await discordSdk.commands.getInstanceConnectedParticipants())
+        .participants
+    );
+
+    await new Promise((res) => setTimeout(res, 1000));
+
+    discordSdk.subscribe(
+      "SPEAKING_START",
+      (u) => {
+        $(`.players div[data-userid="${u.user_id}"]`).addClass("speaking");
+      },
+      { channel_id: discordSdk.channelId }
+    );
+    discordSdk.subscribe(
+      "SPEAKING_STOP",
+      (u) => {
+        $(`.players div[data-userid="${u.user_id}"]`).removeClass("speaking");
+      },
+      { channel_id: discordSdk.channelId }
+    );
+  } catch (e) {
+    console.warn("ERROR ON PLAYER MANAGEMENT", e);
+  }
+});
+
+// DISCORD HELPER FUNCTIONS
 
 async function setupDiscordSdk() {
-	await discordSdk.ready();
-	console.log("Discord SDK is ready");
+  await discordSdk.ready();
+  console.log("Discord SDK is ready");
 
-	const { code } = await discordSdk.commands.authorize({
-		client_id: import.meta.env.VITE_DISCORD_CLIENT_ID,
-		response_type: "code",
-		state: "",
-		prompt: "none",
-		scope: ["identify", "guilds", "applications.commands", "rpc.activities.write"],
-	});
+  const { code } = await discordSdk.commands.authorize({
+    client_id: import.meta.env.VITE_DISCORD_CLIENT_ID,
+    response_type: "code",
+    state: "",
+    prompt: "none",
+    scope: [
+      "identify",
+      "guilds",
+      "applications.commands",
+      "rpc.activities.write",
+      "rpc.voice.read",
+    ],
+  });
 
-	const response = await fetch("/.proxy/api/token", {
-		method: "POST",
-		headers: {
-			"Content-Type": "application/json",
-		},
-		body: JSON.stringify({
-			code,
-		}),
-	});
-	const { access_token } = await response.json();
+  const response = await fetch("/.proxy/api/token", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      code,
+    }),
+  });
+  const { access_token } = await response.json();
 
-	auth = await discordSdk.commands.authenticate({
-		access_token,
-	});
+  auth = await discordSdk.commands.authenticate({
+    access_token,
+  });
 
-	if (auth == null) {
-		throw new Error("Authenticate command failed");
-	}
+  if (auth == null) {
+    throw new Error("Authenticate command failed");
+  }
 }
 
 function updateParticipants(participants) {
-	participants.forEach((p) => {
-		// format: {id: '439490179968008194', username: 'masp.', global_name: 'Masp'}
-		let avatarSrc = user.avatar
-			? `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png?size=256`
-			: `https://cdn.discordapp.com/embed/avatars/${(BigInt(user.id) >> 22n) % 6n}.png`;
-	});
-	console.log(participants);
+  console.log("UPDATING PARTICIPANTS", participants);
+  $(".players")[0].replaceChildren(
+    ...participants.map((p) => {
+      // format: {id: '439490179968008194', username: 'masp.', global_name: 'Masp'}
+      let el = document.createElement("div");
+      el.style.backgroundImage = `url(${
+        p.avatar
+          ? `https://cdn.discordapp.com/avatars/${p.id}/${p.avatar}.png?size=256`
+          : `https://cdn.discordapp.com/embed/avatars/${
+              (BigInt(p.id) >> 22n) % 6n
+            }.png`
+      })`;
+      if (p.id == currentvip) el.classList.add("vip");
+      el.classList.add("czar");
+      el.setAttribute("data-userid", p.id);
+      return el;
+    })
+  );
 }
 
+// SCREEN MANAGEMENT FUNCTIONS
+
 function goTo(screen, ...data) {
-	switch (screen) {
-		case "LOBBY":
-			goToLobby(...data);
-			break;
-		case "CARD_PREVIEW":
-			goToCards(...data);
-			break;
-		case "BLACK_PICK":
-			goToBlackPick(...data);
-			break;
-		case "WHITE_PICK":
-			goToWhitePick(...data);
-			break;
-		case "PRESENT":
-			goToPresent(...data);
-			break;
-		case "WINNER_PICK":
-			goToWinnerPick(...data);
-			break;
-		case "WINNER":
-			goToWinner(...data);
-			break;
-		case "INTERMEDIATE":
-			goToIntermediate(...data);
-			break;
-		case "DUMP":
-			goToDump(...data);
-			break;
-		case "END":
-			goToEnd(...data);
-			break;
-	}
+  switch (screen) {
+    case "LOBBY":
+      goToLobby(...data);
+      break;
+    case "CARD_PREVIEW":
+      goToCards(...data);
+      break;
+    case "BLACK_PICK":
+      goToBlackPick(...data);
+      break;
+    case "WHITE_PICK":
+      goToWhitePick(...data);
+      break;
+    case "PRESENT":
+      goToPresent(...data);
+      break;
+    case "WINNER_PICK":
+      goToWinnerPick(...data);
+      break;
+    case "WINNER":
+      goToWinner(...data);
+      break;
+    case "INTERMEDIATE":
+      goToIntermediate(...data);
+      break;
+    case "DUMP":
+      goToDump(...data);
+      break;
+    case "END":
+      goToEnd(...data);
+      break;
+  }
 }
 
 function goToLobby() {
-	$("#app > .screen").hide();
-	$(".lobby").show();
+  $("#app > .screen").hide();
+  $(".lobby").show();
 }
 
 function goToCards() {
-	$("#app > .screen").hide();
-	$(".cards").show();
+  $("#app > .screen").hide();
+  $(".cards").show();
 }
 
 function goToBlackPick() {
-	$("#app > .screen").hide();
-	$(".black_pick").show();
+  $("#app > .screen").hide();
+  $(".black_pick").show();
 }
 
 function goToWhitePick() {
-	$("#app > .screen").hide();
-	$(".white_pick").show();
+  $("#app > .screen").hide();
+  $(".white_pick").show();
 }
 
 function goToPresent() {
-	$("#app > .screen").hide();
-	$(".present").show();
+  $("#app > .screen").hide();
+  $(".present").show();
 }
 
 function goToWinnerPick() {
-	$("#app > .screen").hide();
-	$(".winner_pick").show();
+  $("#app > .screen").hide();
+  $(".winner_pick").show();
 }
 
 function goToWinner() {
-	$("#app > .screen").hide();
-	$(".winner").show();
+  $("#app > .screen").hide();
+  $(".winner").show();
 }
 
 function goToIntermediate() {
-	$("#app > .screen").hide();
-	$(".intermediate").show();
+  $("#app > .screen").hide();
+  $(".intermediate").show();
 }
 
 function goToEnd() {
-	$("#app > .screen").hide();
-	$(".end").show();
+  $("#app > .screen").hide();
+  $(".end").show();
 }
 
 function goToDump() {
-	$("#app > .screen").hide();
-	$(".dump").show();
+  $("#app > .screen").hide();
+  $(".dump").show();
 }

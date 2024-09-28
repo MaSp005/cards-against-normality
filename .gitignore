@@ -17,6 +17,7 @@ node_modules
 dist
 dist-ssr
 *.local
+.vite
 
 # Editor directories and files
 .vscode/*
@@ -28,3 +29,7 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Helper outputs
+helper/card-splitter/out
+helper/loadingtext/output.json

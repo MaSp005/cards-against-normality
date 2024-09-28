@@ -1,91 +1,140 @@
+* {
+  margin: 0;
+  padding: 0;
+}
 body {
-	overflow: hidden;
-	font-family: Inter, system-ui, Arial, sans-serif;
-	user-select: none;
-	background-color: var(--col-bg-alt);
-	color: white;
+  overflow: hidden;
+  font-family: Inter, system-ui, Arial, sans-serif;
+  user-select: none;
+  background-color: var(--col-bg-alt);
+  color: white;
 
-	padding: 0;
-	margin: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 
-	display: flex;
-	justify-content: center;
-	align-items: center;
+  width: 100vw;
+  height: 100vh;
+}
 
-	width: 100vw;
-	height: 100vh;
+aside.players {
+  width: 5vw;
+  max-width: 4em;
+  position: fixed;
+  left: 16px;
+  top: 50%;
+  z-index: 98;
+  translate: 0 -50%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 1em;
+
+  & div {
+    background-size: contain;
+    background-position: center;
+    background-repeat: no-repeat;
+
+    width: 4em;
+    max-width: 100%;
+    aspect-ratio: 1;
+    border-radius: 50%;
+    backdrop-filter: blur(5px);
+    outline: 2.5px transparent solid;
+    &.speaking {
+      /* color: var(--col-discord-speaking); */
+      outline: 2.5px var(--col-discord-speaking) solid;
+    }
+    &.vip::before {
+      content: "👑";
+      position: absolute;
+      top: -0.9em;
+      left: 16%;
+      /* font-size: 1.5em; */
+	  font-size: 2vw;
+    }
+    &.czar::after {
+      content: "🃏";
+      position: absolute;
+      top: 1.2em;
+      right: -16%;
+      /* font-size: 1.5em; */
+	  font-size: 1.5vw;
+    }
+  }
 }
 
 #app {
-	width: 100%;
-	height: 100%;
-	text-align: center;
+  width: 100%;
+  height: 100%;
+  text-align: center;
 
-	& > .screen {
-		display: none;
-		position: absolute;
-		top: 0;
-		left: 0;
-		width: 100%;
-		height: 100%;
-		background: var(--col-bg-alt);
-	}
+  & > .screen {
+    display: none;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: var(--col-bg-alt);
+  }
 }
 
 .card {
-	transform: scale(0.5);
-	background-color: var(--col-bg);
-	border-radius: 35px;
-	width: 500px;
-	height: 750px;
-	&.white {
-		background: var(--col-light);
-		color: var(--col-dark);
-	}
-	&.black {
-		background: var(--col-dark);
-		color: var(--col-light);
-	}
-	& h1 {
-		position: absolute;
-		top: 20px;
-		margin-inline: 40px;
-		font-size: 48px;
-		font-weight: 900;
-		text-align: left;
-		text-wrap: pretty;
-	}
-	& h2 {
-		position: absolute;
-		top: 20px;
-		left: 0;
-		right: 0;
-		margin-inline: 40px;
-		font-size: 48px;
-		font-weight: 900;
-		text-align: center;
-		text-wrap: pretty;
-	}
-	& h3 {
-		position: absolute;
-		top: 20px;
-		left: 0;
-		right: 0;
-		margin-inline: 40px;
-		font-size: 42px;
-		font-weight: 900;
-		text-align: center;
-		text-wrap: pretty;
-	}
-	& p {
-		position: absolute;
-		bottom: 20px;
-		margin-inline: 40px;
-		font-size: 24px;
-		font-weight: 900;
-		text-align: left;
-		text-wrap: nowrap;
-	}
+  transform: scale(0.5);
+  background-color: var(--col-bg);
+  border-radius: 35px;
+  width: 500px;
+  height: 750px;
+  &.white {
+    background: var(--col-light);
+    color: var(--col-dark);
+  }
+  &.black {
+    background: var(--col-dark);
+    color: var(--col-light);
+  }
+  & h1 {
+    position: absolute;
+    top: 20px;
+    margin-inline: 40px;
+    font-size: 48px;
+    font-weight: 900;
+    text-align: left;
+    text-wrap: pretty;
+  }
+  & h2 {
+    position: absolute;
+    top: 20px;
+    left: 0;
+    right: 0;
+    margin-inline: 40px;
+    font-size: 48px;
+    font-weight: 900;
+    text-align: center;
+    text-wrap: pretty;
+  }
+  & h3 {
+    position: absolute;
+    top: 20px;
+    left: 0;
+    right: 0;
+    margin-inline: 40px;
+    font-size: 42px;
+    font-weight: 900;
+    text-align: center;
+    text-wrap: pretty;
+  }
+  & p {
+    position: absolute;
+    bottom: 20px;
+    margin-inline: 40px;
+    font-size: 24px;
+    font-weight: 900;
+    text-align: left;
+    text-wrap: nowrap;
+  }
 }
 
 /* LOBBY */
@@ -94,61 +143,72 @@ body {
   background-position: center !important;
   background-size: cover !important;
   /* background-blend-mode: multiply !important; */
-	& .menu {
-		position: absolute;
-		display: flex;
-		flex-direction: row;
-		justify-content: center;
-		align-items: center;
-		left: 0;
-		right: 0;
-		bottom: 0;
-		width: calc(100% - 2 * 100px);
-		margin-inline: auto;
-		gap: 16px;
-		& .button {
-			width: 100%;
-			height: 150px;
-			background: var(--col-light);
-			color: var(--col-dark);
-			border-radius: 16px 16px 0 0;
-			font-size: 16px;
-			cursor: pointer;
-			transition: transform 0.2s ease;
-			& h1 {
-				margin-top: 12px;
-				font-size: 36px;
-				font-weight: 900;
-				vertical-align: text-top;
-			}
-			& h2 {
-				font-size: 24px;
-				font-weight: 900;
-				vertical-align: text-top;
-			}
 
-			&.btn1,
-			&.btn5 {
-				transform: translateY(50px);
-				&:hover {
-					transform: translateY(40px);
-				}
-			}
+  & .menu {
+    position: absolute;
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    transform: translateY(25%);
+    width: calc(100% - 2 * 10vw);
+    margin-inline: auto;
+    gap: 1vw;
 
-			&.btn2,
-			&.btn4 {
-				transform: translateY(40px);
-				&:hover {
-					transform: translateY(30px);
-				}
-			}
+    & .button {
+      box-shadow: 3px -2px 16px 0px rgba(0, 0, 0, 0.25);
+      width: 100%;
+      aspect-ratio: 1;
+      background: var(--col-light);
+      color: var(--col-dark);
+      border-radius: 1vw 1vw 0 0;
+      font-size: 2vw;
+      cursor: pointer;
+      transition: transform 0.2s ease;
 
-			&.btn3 {
-				transform: translateY(30px);
-				&:hover {
-					transform: translateY(20px);
-				}
-			}
-		}
-	}
+      & h1 {
+        margin-top: 1.5vh;
+        font-size: 3vw;
+        font-weight: 900;
+        vertical-align: text-top;
+      }
+
+      & h2 {
+        margin-top: 1.5vh;
+        font-size: 2vw;
+        font-weight: 900;
+        vertical-align: text-top;
+      }
+
+      &.btn1,
+      &.btn5 {
+        transform: translateY(10vh);
+        &:hover:not(.disabled) {
+          transform: translateY(9vh);
+        }
+      }
+
+      &.btn2,
+      &.btn4 {
+        transform: translateY(6vh);
+        &:hover:not(.disabled) {
+          transform: translateY(5vh);
+        }
+      }
+
+      &.btn3 {
+        transform: translateY(3vh);
+        &:hover:not(.disabled) {
+          transform: translateY(2vh);
+        }
+      }
+      &.disabled {
+        color: rgba(from var(--col-dark) r g b / 0.5);
+        cursor: not-allowed;
+      }
+    }
+  }
 }

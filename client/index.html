@@ -6,29 +6,45 @@
 	<link rel="icon" type="image/svg+xml" href="/vite.svg" />
 	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 	<title>Cards Against Normality</title>
+	<script type="module">
+		import "./style.css";
+		import $ from "jquery";
+		window.$ = $;
+	</script>
 	<style>
 		:root {
 			--col-bg: #272727;
 			--col-bg-alt: #131417;
-			--col-dark: #231F20;
-			--col-light: #D9D9D9;
-			--col-light-alt: #A5A5A5;
+			--col-dark: #231f20;
+			--col-light: #d9d9d9;
+			--col-light-alt: #a5a5a5;
+			--col-discord-speaking: #24a65b;
 		}
 	</style>
 	<style class="destroy_afer_load">
+		* {
+			margin: 0;
+			padding: 0;
+		}
+
 		body {
 			font-family: Inter, system-ui, Arial, sans-serif;
 			background-color: var(--col-bg-alt);
 			color: white;
 			user-select: none;
+			overflow: hidden;
 		}
 
 		@keyframes rotateCard {
-			from {
+			0% {
 				transform: rotateZ(10deg) rotateY(0deg);
 			}
 
-			to {
+			50% {
+				transform: rotateZ(10deg) rotateY(180deg);
+			}
+
+			100% {
 				transform: rotateZ(10deg) rotateY(360deg);
 			}
 		}
@@ -61,8 +77,9 @@
 			background-color: var(--col-bg-alt);
 
 			& #loading-info {
-				margin-top: 32px;
-				font-size: 32px;
+				margin-top: 48px;
+				/* font-size: 32px; */
+				/* font-size: 24px; */
 				font-weight: 900;
 				text-wrap: nowrap;
 			}
@@ -78,7 +95,8 @@
 				transform-style: preserve-3d;
 				transform-origin: center;
 				transition: transform 1s;
-				animation: rotateCard 12.5s infinite linear;
+				transform: rotateZ(10deg);
+				/* animation: rotateCard 12.5s infinite linear; */
 			}
 
 			& .card-front,
@@ -101,7 +119,7 @@
 
 			& .lcard {
 				perspective: 1000px;
-				animation: bounceCard 7.5s infinite ease;
+				animation: bounceCard 7.5s infinite cubic-bezier(0.37, 0, 0.63, 1);
 				width: 250px;
 				height: 375px;
 				border-radius: 16px;
@@ -139,6 +157,42 @@
 					color: var(--col-dark);
 				}
 			}
+
+			& .btn.play {
+				background-color: var(--col-light);
+				color: var(--col-dark);
+				outline: none;
+				font-size: 20px;
+				font-weight: 900;
+				padding: 12px 32px;
+				border-radius: 8px;
+				cursor: pointer;
+				transition: background-color 0.3s ease-in-out, transform 0.2s, box-shadow 0.2s, color 0.2s;
+				box-shadow: 0 4px 0 var(--col-light-alt), 0 6px 12px rgba(0, 0, 0, 0.2);
+				border: none;
+				/* margin-top: 16px; */
+				text-transform: uppercase;
+
+				&:hover {
+					background-color: color-mix(in oklab, var(--col-light) 50%, var(--col-light-alt));
+					/* Approximate 50% mix of light and light-alt */
+				}
+
+				&:active, &.active {
+					background-color: color-mix(in oklab, var(--col-light) 50%, var(--col-light-alt));
+					box-shadow: none;
+					transform: translateY(2px);
+				}
+
+				&:disabled {
+					/* background-color: rgba(from var(--col-light) r g b / 0.5); */
+					/* box-shadow: 0 4px 0 var(--col-light-alt), 0 6px 12px rgba(0, 0, 0, 0.05); */
+					color: var(--col-light-alt);
+					opacity: 0.75;
+					cursor: not-allowed;
+				}
+			}
+
 		}
 	</style>
 </head>
@@ -150,14 +204,14 @@
 				<div class="card-inner">
 					<div class="card-front">
 						<div class="lcard black">
-							<h1>TSA guidelines now prohibit _____ on airplanes.</h1>
+							<h1>Welcome to _____!</h1>
 							<h2>Cards Against Normality</h2>
 						</div>
 						<!-- <img src="https://i.imgur.com/SulT30L.png" alt="Black Card"> -->
 					</div>
 					<div class="card-back">
 						<div class="lcard white">
-							<h1>Not wearing pants.</h1>
+							<h1><s>Cards Against Normality</s> Hell.</h1>
 							<h2>Cards Against Normality</h2>
 						</div>
 						<!-- <img src="https://i.imgur.com/ttymjY1.png" alt="White Card"> -->
@@ -165,17 +219,22 @@
 				</div>
 			</div>
 		</div>
-		<h1 id="loading-info">Authenticating with Discord...</h1>
+		<h2 id="loading-info">Authenticating with Discord...</h2>
+		<button class="btn play" disabled>
+			PLAY
+		</button>
 	</div>
+	<aside class="players">
+		2 </aside>
 	<div id="app">
 		<div class="screen lobby">
 			<h1>LOBBY</h1>
 			<div class="menu">
-				<div class="button btn1">
-					<h2>PACKS</h1>
+				<div class="button btn1 disabled">
+					<h2>SETTINGS</h1>
 				</div>
-				<div class="button btn2">
-					<h2>SETTINGS</h2>
+				<div class="button btn2 disabled">
+					<h2>PACKS</h2>
 				</div>
 				<div class="button btn3">
 					<h1>START</h1>
@@ -183,7 +242,7 @@
 				<div class="button btn4">
 					<h2>HELP</h2>
 				</div>
-				<div class="button btn5">
+				<div class="button btn5 disabled">
 					<h2>CREDITS</h2>
 				</div>
 			</div>
@@ -216,6 +275,91 @@
 			<h1>DUMP</h1>
 		</div>
 	</div>
+	<script type="module" class="destroy_after_load">
+		let loadingTexts = [{
+				"black": "A romantic, candlelit dinner would be incomplete without _.",
+				"white": "Poorly-timed Holocaust jokes."
+			},
+			{
+				"black": "It's a pity that kids these days are all getting involved with _.",
+				"white": "Wearing underwear inside-out to avoid doing laundry."
+			},
+			{
+				"black": "Instead of coal, Santa now gives the bad children _.",
+				"white": "A brain tumor."
+			},
+			{
+				"black": "What am I giving up for Lent?",
+				"white": "Edible underpants."
+			},
+			{
+				"black": "White people like _.",
+				"white": "Pretending to care."
+			},
+			{
+				"black": "What gets better with age?",
+				"white": "Getting naked and watching Nickelodeon."
+			},
+			{
+				"black": "I do not know with which weapons World War III will be fought, but World War IV will be fought with _.",
+				"white": "An erection that lasts longer than four hours."
+			},
+			{
+				"black": "During sex, I like to think about _.",
+				"white": "Cards Against Humanity."
+			},
+			{
+				"black": "What's that sound?",
+				"white": "My vagina."
+			},
+			{
+				"black": "Daddy, why is Mommy crying?",
+				"white": "Crystal meth."
+			}
+		];
+
+		let spinDuration = 10;
+		$("#loading .card-inner").css("animation", `rotateCard ${spinDuration}s infinite cubic-bezier(0.65, 0, 0.35, 1)`);
+
+		let prevTextIndex = [];
+
+		function getNewText() {
+			let textIndex = Math.floor(Math.random() * loadingTexts.length);
+			while (prevTextIndex.includes(textIndex)) {
+				textIndex = Math.floor(Math.random() * loadingTexts.length);
+			}
+			prevTextIndex.push(textIndex);
+			if (prevTextIndex.length > 3) {
+				prevTextIndex.shift();
+			}
+			return loadingTexts[textIndex];
+		}
+
+		const updateBlackCard = (text) => {
+			$(".lcard.black h1").text(text);
+		};
+
+		const updateWhiteCard = (text) => {
+			$(".lcard.white h1").text(text);
+		};
+
+		const updateCycle = () => {
+			let text = getNewText();
+			updateBlackCard(text.black);
+
+			setTimeout(() => {
+				updateWhiteCard(text.white);
+			}, (spinDuration / 2) * 1000);
+		};
+
+		setTimeout(() => {
+			updateCycle();
+			setInterval(() => {
+				updateCycle();
+			}, spinDuration * 1000);
+		}, spinDuration * 500);
+	</script>
+
 	<script type="module" src="/main.js"></script>
 </body>
 
