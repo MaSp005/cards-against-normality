@@ -16,6 +16,46 @@ body {
   width: 100vw;
   height: 100vh;
 }
+img {
+  user-drag: none;
+  -webkit-user-drag: none;
+  user-select: none;
+  -moz-user-select: none;
+  -webkit-user-select: none;
+  -ms-user-select: none;
+}
+
+/* spinning spiral bg */
+.spiral {
+  background: none;
+  --spin-speed: 120s;
+}
+.spiral::before {
+  content: "";
+  position: fixed;
+  top: 50%;
+  translate: -50% -50%;
+  width: 300%;
+  height: 300%;
+  background-image: url("/src/img/spiral.png?t=2") !important;
+  background-color: var(--col-bg-alt);
+  background-size: cover !important;
+  background-position: center !important;
+  z-index: -1;
+  animation: spin var(--spin-speed) linear infinite;
+  /* opacity: 0.25; */
+}
+.spiral.reverse::before {
+  animation: spin var(--spin-speed) linear infinite reverse;
+}
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
 
 aside.players {
   width: 5vw;
@@ -50,17 +90,20 @@ aside.players {
       content: "👑";
       position: absolute;
       top: -0.9em;
-      left: 16%;
+      /* left: 1.25vw; */
+      /* center */
+      left: 50%;
+      transform: translateX(-50%);
       /* font-size: 1.5em; */
-	  font-size: 2vw;
+      font-size: 2vw;
     }
     &.czar::after {
       content: "🃏";
       position: absolute;
-      top: 1.2em;
-      right: -16%;
+      top: 2.2vw;
+      right: -1vw;
       /* font-size: 1.5em; */
-	  font-size: 1.5vw;
+      font-size: 1.5vw;
     }
   }
 }
@@ -69,6 +112,7 @@ aside.players {
   width: 100%;
   height: 100%;
   text-align: center;
+  cursor: var(--cursor-default);
 
   & > .screen {
     display: none;
@@ -77,7 +121,7 @@ aside.players {
     left: 0;
     width: 100%;
     height: 100%;
-    background: var(--col-bg-alt);
+    /* background-color: var(--col-bg-alt); */
   }
 }
 
@@ -97,7 +141,8 @@ aside.players {
   }
   & h1 {
     position: absolute;
-    top: 20px;
+    /* top: 20px; */
+    top: 32px;
     margin-inline: 40px;
     font-size: 48px;
     font-weight: 900;
@@ -106,44 +151,56 @@ aside.players {
   }
   & h2 {
     position: absolute;
-    top: 20px;
-    left: 0;
-    right: 0;
-    margin-inline: 40px;
-    font-size: 48px;
-    font-weight: 900;
-    text-align: center;
-    text-wrap: pretty;
-  }
-  & h3 {
-    position: absolute;
-    top: 20px;
-    left: 0;
-    right: 0;
-    margin-inline: 40px;
-    font-size: 42px;
-    font-weight: 900;
-    text-align: center;
-    text-wrap: pretty;
-  }
-  & p {
-    position: absolute;
-    bottom: 20px;
+    /* bottom: 20px; */
+    bottom: 32px;
     margin-inline: 40px;
     font-size: 24px;
     font-weight: 900;
     text-align: left;
     text-wrap: nowrap;
   }
+  /* & h1 {
+    position: absolute;
+    top: 25px;
+    left: 0;
+    right: 0;
+    font-size: 24px;
+    font-weight: 900;
+    margin: 0;
+    padding-inline: 20px;
+    text-wrap: pretty;
+  }
+
+  & h2 {
+    position: absolute;
+    bottom: 0px;
+    left: 20px;
+    font-size: 12px;
+    font-weight: 900;
+    margin: 0;
+    margin-bottom: 16px;
+    padding: 0;
+  } */
 }
 
 /* LOBBY */
 
 .screen.lobby {
-  background-position: center !important;
-  background-size: cover !important;
-  /* background-blend-mode: multiply !important; */
+  /* background-image: url("/src/img/splash_dark.png"); */
+  /* background-position: center !important; */
+  /* background-size: cover !important; */
 
+  /* background-blend-mode: multiply !important; */
+  & div.logo {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 24vw;
+    height: 24vw;
+    background: url("/src/img/logo_cards_full.png");
+    background-size: cover;
+  }
   & .menu {
     position: absolute;
     display: flex;
@@ -154,7 +211,7 @@ aside.players {
     right: 0;
     bottom: 0;
     transform: translateY(25%);
-    width: calc(100% - 2 * 10vw);
+    width: calc(100% - 2 * 15vw);
     margin-inline: auto;
     gap: 1vw;
 
@@ -166,21 +223,34 @@ aside.players {
       color: var(--col-dark);
       border-radius: 1vw 1vw 0 0;
       font-size: 2vw;
-      cursor: pointer;
-      transition: transform 0.2s ease;
+      /* cursor: pointer; */
+      cursor: var(--cursor-pointer);
+      /* transition: transform 0.2s ease; */
+      transition: transform 1s cubic-bezier(0.16, 1, 0.3, 1);
 
-      & h1 {
+      & h1,
+      h2 {
         margin-top: 1.5vh;
-        font-size: 3vw;
         font-weight: 900;
         vertical-align: text-top;
+        transition: opacity 0.2s ease;
+        opacity: 1;
+      }
+      & h1 {
+        font-size: 2vw;
+      }
+      & h2 {
+        font-size: 1.5vw;
       }
 
-      & h2 {
-        margin-top: 1.5vh;
-        font-size: 2vw;
-        font-weight: 900;
-        vertical-align: text-top;
+      &.disabled {
+        color: var(--col-dark);
+        /* cursor: not-allowed; */
+        cursor: var(--cursor-not-allowed);
+        & h1,
+        h2 {
+          opacity: 0.5;
+        }
       }
 
       &.btn1,
@@ -205,10 +275,13 @@ aside.players {
           transform: translateY(2vh);
         }
       }
-      &.disabled {
-        color: rgba(from var(--col-dark) r g b / 0.5);
-        cursor: not-allowed;
-      }
     }
+  }
+}
+
+&.screen {
+  & .cards {
+    display: flex;
+    height: 50%;
   }
 }

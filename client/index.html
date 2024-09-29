@@ -19,6 +19,13 @@
 			--col-light: #d9d9d9;
 			--col-light-alt: #a5a5a5;
 			--col-discord-speaking: #24a65b;
+
+			/* --cursor-default: url("/src/img/cursor/left/left_ptr@50px.png"), auto; */
+			--cursor-default: auto;
+			/* --cursor-pointer: url("/src/img/cursor/hand-left/hand2@50px.png"), pointer; */
+			--cursor-pointer: pointer;
+			/* --cursor-not-allowed: url("/src/img/cursor/left/circle@50px.png"), not-allowed; */
+			--cursor-not-allowed: not-allowed;
 		}
 	</style>
 	<style class="destroy_afer_load">
@@ -173,12 +180,13 @@
 				/* margin-top: 16px; */
 				text-transform: uppercase;
 
-				&:hover {
+				&:hover:not(:disabled) {
 					background-color: color-mix(in oklab, var(--col-light) 50%, var(--col-light-alt));
-					/* Approximate 50% mix of light and light-alt */
+					cursor: var(--cursor-pointer);
 				}
 
-				&:active, &.active {
+				&:active:not(:disabled),
+				&.active {
 					background-color: color-mix(in oklab, var(--col-light) 50%, var(--col-light-alt));
 					box-shadow: none;
 					transform: translateY(2px);
@@ -187,9 +195,10 @@
 				&:disabled {
 					/* background-color: rgba(from var(--col-light) r g b / 0.5); */
 					/* box-shadow: 0 4px 0 var(--col-light-alt), 0 6px 12px rgba(0, 0, 0, 0.05); */
+					cursor: var(--cursor-not-allowed);
 					color: var(--col-light-alt);
 					opacity: 0.75;
-					cursor: not-allowed;
+					/* cursor: not-allowed; */
 				}
 			}
 
@@ -227,8 +236,10 @@
 	<aside class="players">
 		2 </aside>
 	<div id="app">
-		<div class="screen lobby">
+		<!-- MENU SCREENS -->
+		<div class="screen lobby spiral">
 			<h1>LOBBY</h1>
+			<div class="logo"></div>
 			<div class="menu">
 				<div class="button btn1 disabled">
 					<h2>SETTINGS</h1>
@@ -247,13 +258,24 @@
 				</div>
 			</div>
 		</div>
-		<div class="screen cards">
+		<div class="screen credits">
+			<h1>CREDITS</h1>
+		</div>
+		<div class="screen settings">
+			<h1>SETTINGS</h1>
+		</div>
+
+		<!-- GAME SCREENS -->
+		<div class="screen cards spiral">
 			<h1>CARDS</h1>
+			<div class="cards"></div>
+			<button>continue</button>
 		</div>
-		<div class="screen black_pick">
+		<div class="screen black_pick spiral reverse">
 			<h1>BLACK_PICK</h1>
+			<div class="cards"></div>
 		</div>
-		<div class="screen white_pick">
+		<div class="screen white_pick spiral">
 			<h1>WHITE_PICK</h1>
 		</div>
 		<div class="screen present">

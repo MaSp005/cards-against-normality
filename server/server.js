@@ -1,9 +1,34 @@
 import express from "express";
 import dotenv from "dotenv";
 import fetch from "node-fetch";
-import { Server } from "socket.io";
+import { Server, Socket } from "socket.io";
 import { instrument } from "@socket.io/admin-ui";
 import { Room } from "./room.js";
+
+/**
+ * Waits for this socket to emit a specific event.
+ * @arg {String} evt Event name to wait for.
+ * @arg {Number} timeout Time in ms to wait before rejecting.
+ * @arg {Function} verify Callback to verify an incoming event, called with data the client sent. Should return a truthy/falsy value.
+ * @returns {Promise<any>} Accepts with the clients data or rejects with void if timeout runs out.
+ */
+Socket.prototype.waitFor = function (evt, timeout = 0, verify = () => true) {
+  return new Promise((acc, rej) => {
+    let to;
+    if (timeout) {
+      to = setTimeout(() => rej(), timeout);
+    }
+
+    let listener = (...data) => {
+      if (verify(...data)) {
+        if (timeout) clearTimeout(to);
+        acc(...data);
+        this.removeListener(evt, listener);
+      }
+    };
+    this.on(evt, listener);
+  });
+};
 
 dotenv.config({ path: "../.env" });
 
@@ -71,9 +96,9 @@ io.on("connection", (socket) => {
   socket.connected = new Date(socket.handshake.time).getTime();
 
   let room = getRoom(socket.handshake.query.instanceId, socket);
-  socket.emit("JOIN_DATA", room.toJSON());
-  console.log(`@${socket.user.username} connected`);
+  socket.emit("GAMESTATE", room.toJSON());
   socket.emit("NEW_VIP", room.vip);
+  console.log(`@${socket.user.username} connected`);
 
   socket.on("disconnect", () => {
     console.log(`@${socket.user.username} disconnected`);
@@ -99,7 +124,7 @@ io.on("connection", (socket) => {
   });
 
   socket.on("CONTINUE", () => {
-    if (room.vip != socket.user.id) return;
-		room.startGame();
+    // if (room.vip != socket.user.id) return;
+    room.startGame();
   });
 });

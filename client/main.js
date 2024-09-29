@@ -5,14 +5,12 @@ import io from "socket.io-client";
 
 // import "./style.css";
 
-import logoFull from "./src/img/logo_cards_full.png";
-import splashBackground from "./src/img/splash_dark.png";
-
 let auth;
 let socket;
 let gamestate;
 let currentvip;
 let mycards = [];
+let pickfrom = [];
 
 const discordSdk = new DiscordSDK(import.meta.env.VITE_DISCORD_CLIENT_ID, {
   // disableConsoleLogOverride: true,
@@ -26,7 +24,7 @@ $(() => {
 
   // set images
   // $(".scren.lobby .logo img").attr("src", logoFull);
-  $(".screen.lobby").css("background-image", `url(${splashBackground})`);
+  // $(".screen.lobby").css("background-image", `url(${splashBackground})`);
   // HELP BUTTON (SUPPORT SERVER)
   $(".screen.lobby .btn4").on("click", () => {
     fetch("https://discord.com/api/guilds/972847626053627934/widget.json", {
@@ -52,7 +50,7 @@ setupDiscordSdk().then(async () => {
   console.log("Discord SDK is authenticated");
   // console.log(auth);
 
-  $("#loading-info").text("Connecting to the socket server...");
+  $("#loading-info").text("Connecting to the game server...");
   // Connect to the socket server
   socket = io(
     "https://" + import.meta.env.VITE_DISCORD_CLIENT_ID + ".discordsays.com",
@@ -75,6 +73,7 @@ setupDiscordSdk().then(async () => {
   socket.on("connect", async () => {
     console.log("Socket connected");
     $("#loading-info").text("Press the button below to start playing!");
+    // socket.emit("HELLO");
 
     // Hide loading indicator
     $("#loading .btn.play").attr("disabled", false);
@@ -83,7 +82,6 @@ setupDiscordSdk().then(async () => {
     $("#loading .btn.play").on("click", async () => {
       $("#loading .btn.play").addClass("active");
       await new Promise((res) => setTimeout(res, 250));
-      goToLobby();
       $("#loading").slideUp(() => {
         $(".destroy_afer_load").remove();
       });
@@ -92,23 +90,28 @@ setupDiscordSdk().then(async () => {
 
   // DOM EVENTS
 
-  // TODO: disable if not vip
   $(".screen.lobby .btn3").click(() => {
     console.log("Start game pls.");
+    socket.emit("CONTINUE");
+  });
+
+  $(".screen.cards button").click(() => {
     socket.emit("CONTINUE");
   });
 
   // SOCKET EVENTS
 
   socket_events: {
-    socket.once("JOIN_DATA", (g) => {
+    socket.on("GAMESTATE", (g) => {
       gamestate = g;
+      console.log(g);
       goTo(g.gamestate.stage);
     });
 
     socket.on("YOUR_CARDS", (c) => {
       console.log(c);
       mycards = c;
+      $(".screen.cards .cards").html(mycards.map(createWhiteCard));
     });
 
     socket.on("NEW_VIP", async (c) => {
@@ -130,11 +133,12 @@ setupDiscordSdk().then(async () => {
     });
 
     socket.on("BLACK_OPTIONS", (d) => {
-      goToBlackPick(d);
+      pickfrom = d;
+      $(".screen.black_pick .cards").html(pickfrom.map(createBlackCard));
     });
 
     socket.on("BLACK_PROMPT", (d) => {
-      goToWhitePick(d);
+      gamestate.black = d;
     });
 
     socket.on("WHITE_PRESENT", (d) => {
@@ -142,7 +146,7 @@ setupDiscordSdk().then(async () => {
     });
 
     socket.on("WHITE_OPTIONS", (d) => {
-      goToWinnerPick(d);
+      pickfrom = d;
     });
 
     socket.on("WINNER", (d) => {
@@ -245,6 +249,17 @@ function updateParticipants(participants) {
   );
 }
 
+// DOM HELPER FUNCTIONS
+
+function createCard(color, text) {
+  let obj = document.createElement("div");
+  obj.className = "card " + color;
+  obj.innerHTML = `<h1>${text}</h1><h2>Cards Against Normality</h2>`;
+  return obj;
+}
+const createWhiteCard = (text) => createCard("white", text);
+const createBlackCard = (text) => createCard("black", text);
+
 // SCREEN MANAGEMENT FUNCTIONS
 
 function goTo(screen, ...data) {
@@ -289,12 +304,14 @@ function goToLobby() {
 
 function goToCards() {
   $("#app > .screen").hide();
-  $(".cards").show();
+  $(".screen.cards").show();
+  console.log("my cards", mycards);
 }
 
-function goToBlackPick() {
+function goToBlackPick(opt) {
   $("#app > .screen").hide();
-  $(".black_pick").show();
+  $(".screen.black_pick").show();
+  console.log("black options:", pickfrom);
 }
 
 function goToWhitePick() {
