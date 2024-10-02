@@ -216,14 +216,12 @@
 							<h1>Welcome to _____!</h1>
 							<h2>Cards Against Normality</h2>
 						</div>
-						<!-- <img src="https://i.imgur.com/SulT30L.png" alt="Black Card"> -->
 					</div>
 					<div class="card-back">
 						<div class="lcard white">
 							<h1><s>Cards Against Normality</s> Hell.</h1>
 							<h2>Cards Against Normality</h2>
 						</div>
-						<!-- <img src="https://i.imgur.com/ttymjY1.png" alt="White Card"> -->
 					</div>
 				</div>
 			</div>
@@ -233,68 +231,113 @@
 			PLAY
 		</button>
 	</div>
-	<aside class="players">
-		2 </aside>
+	<aside class="players"></aside>
 	<div id="app">
 		<!-- MENU SCREENS -->
-		<div class="screen lobby spiral">
+		<div class="screen" data-screen="lobby" data-background="spiral">
 			<h1>LOBBY</h1>
 			<div class="logo"></div>
+			<div class="popover tutorial">
+				<div class="content">
+					<h1>How to play</h1>
+					<p>Each round, one player asks a question from a black card, and everyone else answers with their funniest white card.</p>
+					<p>The player who asked the question picks the funniest answer, and the player who played that answer wins the round.</p>
+					<p>First player to win 5 rounds wins the game!</p>
+					<button class="btn" data-action="discord">Support Discord</button>
+					<button class="btn" data-action="close">Got it!</button>
+				</div>
+			</div>
+			<div class="popover credits">
+				<div class="content">
+					<h1>Credits</h1>
+					<p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Perferendis eius rem quas unde suscipit a reiciendis ut corrupti vitae quos iure soluta, quod, sit dignissimos expedita fugiat aut nihil doloremque!</p>
+					<button class="btn" data-action="discord">Support Discord</button>
+					<button class="btn" data-action="close">Got it!</button>
+				</div>
+			</div>
 			<div class="menu">
-				<div class="button btn1 disabled">
+				<div class="buttonCard hidden btn1">
 					<h2>SETTINGS</h1>
 				</div>
-				<div class="button btn2 disabled">
+				<div class="buttonCard hidden btn2 disabled">
 					<h2>PACKS</h2>
 				</div>
-				<div class="button btn3">
+				<div class="buttonCard hidden btn3">
 					<h1>START</h1>
 				</div>
-				<div class="button btn4">
+				<div class="buttonCard hidden btn4">
 					<h2>HELP</h2>
 				</div>
-				<div class="button btn5 disabled">
+				<div class="buttonCard hidden btn5">
 					<h2>CREDITS</h2>
 				</div>
 			</div>
 		</div>
-		<div class="screen credits">
+		<div class="screen" data-screen="credits" data-background="spiral">
 			<h1>CREDITS</h1>
+			<div class="menu">
+				<div class="buttonCard hidden btn1">
+					<h2>BACK</h1>
+				</div>
+			</div>
 		</div>
-		<div class="screen settings">
+		<div class="screen" data-screen="settings">
 			<h1>SETTINGS</h1>
+
+			<div class="menu">
+				<div class="buttonCard hidden btn1">
+					<h2>BACK</h1>
+				</div>
+				<div class="buttonCard hidden btn2 disabled">
+					<h2>PACKS</h2>
+				</div>
+				<div class="buttonCard hidden btn3">
+					<h1>START</h1>
+				</div>
+				<div class="buttonCard hidden btn4">
+					<h2>HELP</h2>
+				</div>
+				<div class="buttonCard hidden btn5 disabled">
+					<h2>CREDITS</h2>
+				</div>
+			</div>
 		</div>
 
 		<!-- GAME SCREENS -->
-		<div class="screen cards spiral">
-			<h1>CARDS</h1>
-			<div class="cards"></div>
-			<button>continue</button>
+		<div class="screen" data-screen="card_preview" data-background="spiral">
+			<h1>Examine your cards.</h1>
+			<div class="white_cards"></div>
+			<button class="btn">CONTINUE</button>
 		</div>
-		<div class="screen black_pick spiral reverse">
+		<div class="screen" data-screen="black_pick" data-background="spiral">
 			<h1>BLACK_PICK</h1>
-			<div class="cards"></div>
+			<div class="black_cards"></div>
 		</div>
-		<div class="screen white_pick spiral">
+		<div class="screen" data-screen="white_pick" data-background="spiral">
 			<h1>WHITE_PICK</h1>
+			<div class="prompt"></div>
+			<div class="dropoff"></div>
+			<div class="white_cards"></div>
+			<button class="btn">SUBMIT</button>
 		</div>
-		<div class="screen present">
+		<div class="screen" data-screen="present" data-background="spiral">
 			<h1>PRESENT</h1>
 		</div>
-		<div class="screen winner_pick">
+		<div class="screen" data-screen="winner_pick" data-background="spiral">
 			<h1>WINNER_PICK</h1>
 		</div>
-		<div class="screen winner">
+		<div class="screen" data-screen="winner" data-background="spiral">
 			<h1>WINNER</h1>
 		</div>
-		<div class="screen intermediate">
+		<div class="screen" data-screen="intermediate" data-background="spiral">
 			<h1>INTERMEDIATE</h1>
 		</div>
-		<div class="screen end">
+		<div class="screen" data-screen="end" data-background="spiral">
 			<h1>END</h1>
 		</div>
-		<div class="screen dump">
+		<div class="screen" data-screen="dump" data-background="spiral">
 			<h1>DUMP</h1>
+			<div class="white_cards"></div>
 		</div>
 	</div>
 	<script type="module" class="destroy_after_load">

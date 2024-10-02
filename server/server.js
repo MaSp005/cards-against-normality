@@ -99,6 +99,7 @@ io.on("connection", (socket) => {
   socket.emit("GAMESTATE", room.toJSON());
   socket.emit("NEW_VIP", room.vip);
   console.log(`@${socket.user.username} connected`);
+  room.refreshClient(socket);
 
   socket.on("disconnect", () => {
     console.log(`@${socket.user.username} disconnected`);
@@ -115,7 +116,6 @@ io.on("connection", (socket) => {
         .then((clients) => {
           if (!Array.isArray(clients)) clients = [clients];
           let min = Math.min(...clients.map((c) => c.connected));
-          let newvipidx = clients.findIndex((c) => c.connected == min);
           let newvip = clients.find((c) => c.connected == min);
           room.setVIP(newvip);
           console.log(`-> Made @${newvip.user.username} new VIP.`);

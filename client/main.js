@@ -24,25 +24,91 @@ $(() => {
 
   // set images
   // $(".scren.lobby .logo img").attr("src", logoFull);
-  // $(".screen.lobby").css("background-image", `url(${splashBackground})`);
+  // $(".screen[data-screen="lobby"]").css("background-image", `url(${splashBackground})`);
   // HELP BUTTON (SUPPORT SERVER)
-  $(".screen.lobby .btn4").on("click", () => {
-    fetch("https://discord.com/api/guilds/972847626053627934/widget.json", {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-      },
-    })
-      .then((res) => res.json())
-      .then((data) => {
-        console.log(data);
-        discordSdk.commands.openExternalLink({
-          url: data.instant_invite,
-        });
-      })
-      .catch((error) => {
-        console.error("Error fetching data:", error);
-      });
+  $('.screen[data-screen="lobby"] .btn4').on("click", () => {
+    $(".popover.tutorial").addClass("active");
+    $(".popover.tutorial").on("click", (event) => {
+      if ($(event.target).closest(".popover.tutorial .btn").length) {
+        // [data-action=close]
+        if ($(event.target).closest(".btn").attr("data-action") == "close") {
+          $(".popover.tutorial").removeClass("active");
+          return;
+        } else if (
+          $(event.target).closest(".btn").attr("data-action") == "discord"
+        ) {
+          fetch(
+            "https://discord.com/api/guilds/972847626053627934/widget.json",
+            {
+              method: "GET",
+              headers: {
+                "Content-Type": "application/json",
+              },
+            }
+          )
+            .then((res) => res.json())
+            .then((data) => {
+              console.log(data);
+              discordSdk.commands.openExternalLink({
+                url: data.instant_invite,
+              });
+            })
+            .catch((error) => {
+              console.error("Error fetching data:", error);
+            });
+          return;
+        }
+      }
+
+      if ($(event.target).closest(".popover.tutorial .content").length) return;
+
+      $(".popover.tutorial").removeClass("active");
+    });
+  });
+
+  $('.screen[data-screen="lobby"] .btn5').on("click", () => {
+    $(".popover.credits").addClass("active");
+    $(".popover.credits").on("click", (event) => {
+      if ($(event.target).closest(".popover.credits .btn").length) {
+        // [data-action=close]
+        if ($(event.target).closest(".btn").attr("data-action") == "close") {
+          $(".popover.credits").removeClass("active");
+          return;
+        } else if (
+          $(event.target).closest(".btn").attr("data-action") == "discord"
+        ) {
+          fetch(
+            "https://discord.com/api/guilds/972847626053627934/widget.json",
+            {
+              method: "GET",
+              headers: {
+                "Content-Type": "application/json",
+              },
+            }
+          )
+            .then((res) => res.json())
+            .then((data) => {
+              console.log(data);
+              discordSdk.commands.openExternalLink({
+                url: data.instant_invite,
+              });
+            })
+            .catch((error) => {
+              console.error("Error fetching data:", error);
+            });
+          return;
+        }
+      }
+
+      if ($(event.target).closest(".popover.credits .content").length) return;
+
+      $(".popover.credits").removeClass("active");
+    });
+  });
+
+  $('.screen[data-screen="lobby"] .btn1').on("click", () => {
+    if (!$('.screen[data-screen="lobby"] .btn1').is(".disabled"))
+      goTo("SETTINGS");
   });
 });
 
@@ -70,6 +136,9 @@ setupDiscordSdk().then(async () => {
     }
   );
 
+  socket.onAny((...msg) => console.log("RECEIVED:", ...msg));
+  socket.onAnyOutgoing((...msg) => console.log("SENDING:", ...msg));
+
   socket.on("connect", async () => {
     console.log("Socket connected");
     $("#loading-info").text("Press the button below to start playing!");
@@ -90,12 +159,13 @@ setupDiscordSdk().then(async () => {
 
   // DOM EVENTS
 
-  $(".screen.lobby .btn3").click(() => {
+  $('.screen[data-screen="lobby"] .btn3').click(() => {
+    // if ($('.screen[data-screen="lobby"] .btn3').is(".disabled")) return;
     console.log("Start game pls.");
     socket.emit("CONTINUE");
   });
 
-  $(".screen.cards button").click(() => {
+  $('.screen[data-screen="card_preview"] button').click(() => {
     socket.emit("CONTINUE");
   });
 
@@ -108,19 +178,16 @@ setupDiscordSdk().then(async () => {
       goTo(g.gamestate.stage);
     });
 
-    socket.on("YOUR_CARDS", (c) => {
-      console.log(c);
-      mycards = c;
-      $(".screen.cards .cards").html(mycards.map(createWhiteCard));
-    });
-
     socket.on("NEW_VIP", async (c) => {
       console.log("NEW VIP:", c, c == auth.user.id, auth.user.id);
       currentvip = c;
 
       // (de)activate menu start button
-      $(".screen.lobby .btn3").toggleClass("disabled", c != auth.user.id);
-      $(".screen.lobby .btn3").attr(
+      $('.screen[data-screen="lobby"] :is(.btn3,.btn1)').toggleClass(
+        "disabled",
+        c != auth.user.id
+      );
+      $('.screen[data-screen="lobby"] .btn3').attr(
         "title",
         c == auth.user.id
           ? "Click to start the game!"
@@ -132,13 +199,67 @@ setupDiscordSdk().then(async () => {
       $(`.players div[data-userid="${c}"]`).addClass("vip");
     });
 
+    socket.on("YOUR_CARDS", (c) => {
+      console.log(c);
+      mycards = c;
+      $('.screen[data-screen="card_preview"] .white_cards').html(
+        mycards.map(buildWhiteCard)
+      );
+      $('.screen[data-screen="white_pick"] .white_cards').html(
+        mycards.map(buildWhiteCard)
+      );
+      $('.screen[data-screen="dump"] .white_cards').html(mycards.map(buildWhiteCard));
+    });
+
     socket.on("BLACK_OPTIONS", (d) => {
+      console.log("Received Black Options:", d);
       pickfrom = d;
-      $(".screen.black_pick .cards").html(pickfrom.map(createBlackCard));
+      $('.screen[data-screen="black_pick"] .black_cards').html(
+        pickfrom.map((opt, i) => {
+          let dom = buildBlackCard(opt);
+          dom.addEventListener("click", () => {
+            socket.emit("BLACK_PICK", i);
+          });
+          return dom;
+        })
+      );
     });
 
     socket.on("BLACK_PROMPT", (d) => {
+      console.log("Received Prompt:", d);
       gamestate.black = d;
+      let dragging = null;
+
+      // TODO: dragging system
+      // clicking should place at first empty spot, or last spot
+      // dragging into occupied spot should shove existing one back into white deck
+      $('.screen[data-screen="white_pick"] .prompt').html(
+        buildBlackCard(d.text)
+      );
+      $('.screen[data-screen="white_pick"] .dropoff').html(
+        `<div class="spot"></div>`.repeat(d.pick)
+      );
+      $('.screen[data-screen="white_pick"] .white_cards').each((i, c) => {
+        $(c).attr("draggable", true);
+        c.addEventListener("dragstart", (evt) => {
+          console.log("drag start evt", evt);
+        });
+      });
+      $('.screen[data-screen="white_pick"] .dropoff .spot').each((i, s) => {
+        s.addEventListener("dragover", (evt) => {
+          console.log("drag over evt", evt);
+        });
+        s.addEventListener("drop", (evt) => {
+          console.log("drop evt", evt);
+        });
+      });
+
+      // TODO: work out selected cards
+      function finish() {
+        socket.emit("WHITE_ANSWER", ["lorem", "ipsum", "dolor"].slice(0, d.pick));
+      }
+
+      setTimeout(finish, 5000);
     });
 
     socket.on("WHITE_PRESENT", (d) => {
@@ -150,7 +271,7 @@ setupDiscordSdk().then(async () => {
     });
 
     socket.on("WINNER", (d) => {
-      goToWinner(d);
+      goTo("WINNER", d);
     });
 
     socket.on("TO_SCREEN", (s) => {
@@ -251,100 +372,48 @@ function updateParticipants(participants) {
 
 // DOM HELPER FUNCTIONS
 
-function createCard(color, text) {
+function buildCard(color, text) {
   let obj = document.createElement("div");
   obj.className = "card " + color;
   obj.innerHTML = `<h1>${text}</h1><h2>Cards Against Normality</h2>`;
   return obj;
 }
-const createWhiteCard = (text) => createCard("white", text);
-const createBlackCard = (text) => createCard("black", text);
+const buildWhiteCard = (text) => buildCard("white", text);
+const buildBlackCard = (text) => buildCard("black", text);
 
 // SCREEN MANAGEMENT FUNCTIONS
 
-function goTo(screen, ...data) {
-  switch (screen) {
-    case "LOBBY":
-      goToLobby(...data);
-      break;
-    case "CARD_PREVIEW":
-      goToCards(...data);
-      break;
-    case "BLACK_PICK":
-      goToBlackPick(...data);
-      break;
-    case "WHITE_PICK":
-      goToWhitePick(...data);
-      break;
-    case "PRESENT":
-      goToPresent(...data);
-      break;
-    case "WINNER_PICK":
-      goToWinnerPick(...data);
-      break;
-    case "WINNER":
-      goToWinner(...data);
-      break;
-    case "INTERMEDIATE":
-      goToIntermediate(...data);
-      break;
-    case "DUMP":
-      goToDump(...data);
-      break;
-    case "END":
-      goToEnd(...data);
-      break;
+async function goTo(screen, ...data) {
+  screen = screen.toLowerCase();
+
+  let currentScreen = $('.screen[data-screen="active"]').attr("data-screen");
+  console.log(`[SWITCHING SCREEN] ${currentScreen} -> ${screen}`);
+
+  if (screen == currentScreen) return;
+
+  if (screen !== "lobby" && currentScreen === "lobby") {
+    $('.screen[data-screen="lobby"] .popover.tutorial').removeClass("active");
+    await $('.screen[data-screen="lobby"] .menu .buttonCard').each((i, el) => {
+      setTimeout(() => {
+        $(el).addClass("hidden");
+        let audio = new Audio("/src/audio/cardSlide1.ogg");
+        audio.play();
+      }, i * 100);
+    });
   }
-}
 
-function goToLobby() {
-  $("#app > .screen").hide();
-  $(".lobby").show();
-}
+  $(`.screen[data-screen=${screen}] .menu .buttonCard`).removeClass("hidden");
 
-function goToCards() {
-  $("#app > .screen").hide();
-  $(".screen.cards").show();
-  console.log("my cards", mycards);
-}
+  let classList = Array.from($("#app")[0].classList);
+  // console.log(classList);
+  classList.forEach((x) => {
+    console.log(x);
+    if (x.startsWith("bge-")) {
+      $("#app").removeClass(x);
+      console.log("removed", x);
+    }
+  });
 
-function goToBlackPick(opt) {
-  $("#app > .screen").hide();
-  $(".screen.black_pick").show();
-  console.log("black options:", pickfrom);
-}
-
-function goToWhitePick() {
-  $("#app > .screen").hide();
-  $(".white_pick").show();
-}
-
-function goToPresent() {
-  $("#app > .screen").hide();
-  $(".present").show();
-}
-
-function goToWinnerPick() {
-  $("#app > .screen").hide();
-  $(".winner_pick").show();
-}
-
-function goToWinner() {
-  $("#app > .screen").hide();
-  $(".winner").show();
-}
-
-function goToIntermediate() {
-  $("#app > .screen").hide();
-  $(".intermediate").show();
-}
-
-function goToEnd() {
-  $("#app > .screen").hide();
-  $(".end").show();
-}
-
-function goToDump() {
-  $("#app > .screen").hide();
-  $(".dump").show();
+  $(`.screen:not([data-screen=${screen}])`).removeClass("active");
+  $(`.screen[data-screen="${screen.toLowerCase()}"]`).addClass("active");
 }

@@ -37,14 +37,17 @@ function democracy(arr) {
   return mostpop[Math.floor(Math.random() * mostpop.length)] || arr[0];
 }
 
-// import baseDeck from ;
 import fs from "fs";
 const baseDeck = JSON.parse(fs.readFileSync("./src/packs/Base.json", "utf8"));
 
 const cardsPerPlayer = 8;
 const timeouts = {
-  cardpreview: 20 * 1000,
-  blackpick: 30 * 1000,
+  // cardpreview: 20 * 1000,
+  cardpreview: 0,
+  // blackpick: 30 * 1000,
+  blackpick: 0,
+  // whiteanswer: 60 * 1000,
+  whiteanswer: 0,
 };
 
 /**
@@ -74,7 +77,7 @@ export class Room {
   blackdiscard = [];
   isdemocracy = false;
   gamestate = {
-    stage: "LOBBY",
+    stage: "lobby",
     czar: null,
     round: 0,
     cycle: 0,
@@ -99,13 +102,41 @@ export class Room {
   }
 
   /**
+   * Refreshes a new connection with current data.
+   * @arg {Socket} ncl New connection socket of potentially reconnected player.
+   */
+  refreshClient(ncl) {
+    // TODO: Transfer waitfor()s, however thatll work lmao
+    let idx = this.playerClients.findIndex((cl) => cl.user.id == ncl.user.id);
+    if (idx == -1) return;
+    this.playerClients[idx] = ncl;
+    ncl.emit(
+      "YOUR_CARDS",
+      this.cards[ncl.user.id].map((i) => baseDeck.white[i])
+    );
+  }
+
+  // --- Meta Utilities ---
+
+  /**
    * Sets this room's VIP to this user and emits the update event.
    * @arg {String} user User ID of new VIP
    */
   setVIP(user) {
-    console.log(user);
     this.vip = user.user.id;
     this._io.in(this.name).emit("NEW_VIP", this.vip);
+  }
+
+  // --- Game Utilities ---
+
+  /**
+   * Sets the new Czar to the next in line.
+   */
+  nextCzar() {
+    this.gamestate.czar =
+      this.playerClients[
+        this.gamestate.round % this.playerClients.length
+      ].user.id;
   }
 
   /**
@@ -182,11 +213,15 @@ export class Room {
     // console.log(this.whitedeck, this.blackdeck);
   }
 
+  // --- Progression Methods ---
+
+  // TODO: Show timeouts to player
+
   /**
    * Starts the game.
    */
   async startGame() {
-    if (this.gamestate.stage != "LOBBY") return;
+    if (this.gamestate.stage != "lobby") return;
     console.log("-- STARTING GAME --");
     this.shuffleDeck(3, true);
     this.cards = {};
@@ -194,10 +229,11 @@ export class Room {
     this.playerClients = await this._io.of("/").in(this.name).fetchSockets();
 
     this.gamestate = {
-      stage: "CARD_PREVIEW",
+      stage: "card_preview",
       czar: null,
       round: 0,
       cycle: 0,
+      black: null,
     };
 
     this.startRound();
@@ -210,6 +246,8 @@ export class Room {
     console.log("STARTING ROUND");
     this.gamestate.round++;
 
+    this.nextCzar();
+
     this.distributeCards(this.playerClients.map((c) => c.user.id));
     this.playerClients.forEach((c) => {
       c.emit(
@@ -218,14 +256,10 @@ export class Room {
       );
     });
 
-    this.startCardPreview();
-  }
-
-  async startCardPreview() {
     console.log("Starting Card Preview");
-    
-    this.gamestate.stage = "CARD_PREVIEW";
-    this._io.in(this.name).emit("TO_SCREEN", this.gamestate.stage);
+
+    this.gamestate.stage = "card_preview";
+    this._io.in(this.name).emit("GAMESTATE", this.toJSON());
 
     await Promise.allSettled(
       this.playerClients.map((cl) =>
@@ -239,11 +273,10 @@ export class Room {
   async startBlackPick() {
     console.log("Starting Black Pick.");
 
-    this.gamestate.stage = "BLACK_PICK";
+    this.gamestate.stage = "black_pick";
     this._io.in(this.name).emit("TO_SCREEN", this.gamestate.stage);
 
     let options = this.pullBlack(3);
-    // console.log(options);
 
     if (this.isdemocracy) {
       this._io.in(this.name).emit(
@@ -276,7 +309,9 @@ export class Room {
 
       this.gamestate.black = baseDeck.black[options[democracy(votes)]];
     } else {
-      let czarClient = this.playerClients.find((x) => x.user.id == this.vip);
+      let czarClient = this.playerClients.find(
+        (x) => x.user.id == this.gamestate.czar
+      );
 
       czarClient.emit(
         "BLACK_OPTIONS",
@@ -295,5 +330,35 @@ export class Room {
     }
 
     console.log("Votes are in:", this.gamestate.black);
+
+    this.startWhitePick();
+  }
+
+  async startWhitePick() {
+    this._io.in(this.name).emit("BLACK_PROMPT", this.gamestate.black);
+
+    this.gamestate.stage = "white_pick";
+    this._io.in(this.name).emit("TO_SCREEN", this.gamestate.stage);
+
+    // TODO: check if players have played cards
+    let picksRaw = await Promise.allSettled(
+      this.playerClients.map((c) =>
+        c.waitFor("WHITE_ANSWER", timeouts.whiteanswer).then(
+          (p) => ({
+            user: c.user.id,
+            pick: p,
+          }),
+          () => Promise.reject(c.user.id)
+        )
+      )
+    );
+
+    let picks = {};
+    picksRaw.forEach((p) => {
+      if (p.status == "fulfilled") picks[p.value.user] = p.value.pick;
+      else picks[p.reason] = null;
+    });
+
+    console.log("Picks are in:", picks);
   }
 }
