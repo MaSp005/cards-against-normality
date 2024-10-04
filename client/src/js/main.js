@@ -108,7 +108,11 @@ $(() => {
 
   $('.screen[data-screen="lobby"] .btn1').on("click", () => {
     if (!$('.screen[data-screen="lobby"] .btn1').is(".disabled"))
-      goTo("SETTINGS");
+      goTo("settings");
+  });
+  $('.screen[data-screen="settings"] .btn1').on("click", () => {
+    if (!$('.screen[data-screen="settings"] .btn1').is(".disabled"))
+      goTo("lobby");
   });
 });
 
@@ -208,7 +212,9 @@ setupDiscordSdk().then(async () => {
       $('.screen[data-screen="white_pick"] .white_cards').html(
         mycards.map(buildWhiteCard)
       );
-      $('.screen[data-screen="dump"] .white_cards').html(mycards.map(buildWhiteCard));
+      $('.screen[data-screen="dump"] .white_cards').html(
+        mycards.map(buildWhiteCard)
+      );
     });
 
     socket.on("BLACK_OPTIONS", (d) => {
@@ -239,27 +245,46 @@ setupDiscordSdk().then(async () => {
       $('.screen[data-screen="white_pick"] .dropoff').html(
         `<div class="spot"></div>`.repeat(d.pick)
       );
-      $('.screen[data-screen="white_pick"] .white_cards').each((i, c) => {
-        $(c).attr("draggable", true);
+      $('.screen[data-screen="white_pick"] .white_cards .card').each((i, c) => {
+        c.draggable = true;
         c.addEventListener("dragstart", (evt) => {
+          $(c).addClass("dragging");
           console.log("drag start evt", evt);
+          dragging = c;
+        });
+        c.addEventListener("dragend", (evt) => {
+          $(c).removeClass("dragging");
+          console.log("drag end evt", evt);
+          dragging = null;
         });
       });
       $('.screen[data-screen="white_pick"] .dropoff .spot').each((i, s) => {
         s.addEventListener("dragover", (evt) => {
+          evt.preventDefault();
           console.log("drag over evt", evt);
         });
         s.addEventListener("drop", (evt) => {
+          evt.preventDefault();
           console.log("drop evt", evt);
+          if (s.childElementCount)
+            $('.screen[data-screen="white_pick"] .white_cards').append(
+              s.children[0]
+            );
+          $(s).append([dragging]);
         });
       });
 
       // TODO: work out selected cards
       function finish() {
-        socket.emit("WHITE_ANSWER", ["lorem", "ipsum", "dolor"].slice(0, d.pick));
+        socket.emit(
+          "WHITE_ANSWER",
+          [...$('.screen[data-screen="white_pick"] .dropoff .spot')].map((s) =>
+            s.childElementCount ? s.children[0].children[0].innerText : null
+          )
+        );
       }
 
-      setTimeout(finish, 5000);
+      setTimeout(finish, 15000);
     });
 
     socket.on("WHITE_PRESENT", (d) => {
@@ -357,7 +382,10 @@ function updateParticipants(participants) {
       let el = document.createElement("div");
       el.style.backgroundImage = `url(${
         p.avatar
-          ? `https://cdn.discordapp.com/avatars/${p.id}/${p.avatar}.png?size=256`
+          ? // ? `https://cdn.discordapp.com/avatars/${p.id}/${p.avatar}.png?size=256`
+            `https://cdn.discordapp.com/avatars/${p.id}/${p.avatar}${
+              p.avatar.startsWith("a_") ? ".gif" : ".png"
+            }?size=256`
           : `https://cdn.discordapp.com/embed/avatars/${
               (BigInt(p.id) >> 22n) % 6n
             }.png`
@@ -386,34 +414,52 @@ const buildBlackCard = (text) => buildCard("black", text);
 async function goTo(screen, ...data) {
   screen = screen.toLowerCase();
 
-  let currentScreen = $('.screen[data-screen="active"]').attr("data-screen");
+  let currentScreen = $(".screen.active").attr("data-screen");
   console.log(`[SWITCHING SCREEN] ${currentScreen} -> ${screen}`);
 
-  if (screen == currentScreen) return;
+  if (screen === currentScreen) return;
 
-  if (screen !== "lobby" && currentScreen === "lobby") {
-    $('.screen[data-screen="lobby"] .popover.tutorial').removeClass("active");
-    await $('.screen[data-screen="lobby"] .menu .buttonCard').each((i, el) => {
-      setTimeout(() => {
-        $(el).addClass("hidden");
-        let audio = new Audio("/src/audio/cardSlide1.ogg");
-        audio.play();
-      }, i * 100);
-    });
+  // Animation für das Verstecken der Button Cards beim Verlassen eines Screens
+  if (currentScreen === "lobby" || currentScreen === "settings") {
+    $(
+      '.screen[data-screen="' + currentScreen + '"] .popover.tutorial'
+    ).removeClass("active");
+    await $(`.screen[data-screen="${currentScreen}"] .menu .buttonCard`).each(
+      (i, el) => {
+        console.log(i, el.target);
+        setTimeout(() => {
+          $(el).addClass("hidden");
+        }, i * 70);
+      }
+    );
+    await new Promise((res) =>
+      setTimeout(
+        res,
+        $(`.screen[data-screen="${currentScreen}"] .menu .buttonCard`).length *
+          70 +
+          300
+      )
+    );
   }
 
-  $(`.screen[data-screen=${screen}] .menu .buttonCard`).removeClass("hidden");
+  // Button Cards im neuen Bildschirm erst mal verstecken
+  $(`.screen[data-screen=${screen}] .menu .buttonCard`).addClass("hidden");
 
+  // Nach einem kleinen Delay die Button Cards wieder anzeigen
+  setTimeout(() => {
+    $(`.screen[data-screen=${screen}] .menu .buttonCard`).removeClass("hidden");
+  }, 100); // Hier ist der Delay für das Aufpoppen
+
+  // Entfernen der Hintergründe, die mit bge- anfangen
   let classList = Array.from($("#app")[0].classList);
-  // console.log(classList);
   classList.forEach((x) => {
-    console.log(x);
     if (x.startsWith("bge-")) {
       $("#app").removeClass(x);
       console.log("removed", x);
     }
   });
 
+  // Deaktivieren der aktuellen Ansicht und Aktivieren des neuen Screens
   $(`.screen:not([data-screen=${screen}])`).removeClass("active");
   $(`.screen[data-screen="${screen.toLowerCase()}"]`).addClass("active");
 }

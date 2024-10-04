@@ -379,6 +379,16 @@ aside.players {
     }
     & > .dropoff {
       grid-area: d;
+      display: flex;
+      justify-content: right;
+      gap: 2em;
+
+      & > .spot {
+        border-radius: 17.5px;
+        width: 250px;
+        height: 375px;
+        background-color: color-mix(in srgb, var(--col-light), transparent 80%);
+      }
     }
     & > .white_cards {
       grid-area: w;
