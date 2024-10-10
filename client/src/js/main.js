@@ -1,5 +1,6 @@
 import { DiscordSDK } from "@discord/embedded-app-sdk";
 import io from "socket.io-client";
+
 // import $ from "jquery";
 // window.$ = $;
 
@@ -459,6 +460,10 @@ async function goTo(screen, ...data) {
     }
   });
 
+  $("#app").addClass(
+    `bge-${$(".screen[data-screen=" + screen + "]").attr("data-background")}`
+  );
+  
   // Deaktivieren der aktuellen Ansicht und Aktivieren des neuen Screens
   $(`.screen:not([data-screen=${screen}])`).removeClass("active");
   $(`.screen[data-screen="${screen.toLowerCase()}"]`).addClass("active");
