@@ -240,8 +240,10 @@
 			<div class="popover tutorial">
 				<div class="content">
 					<h1>How to play</h1>
-					<p>Each round, one player asks a question from a black card, and everyone else answers with their funniest white card.</p>
-					<p>The player who asked the question picks the funniest answer, and the player who played that answer wins the round.</p>
+					<p>Each round, one player asks a question from a black card, and everyone else answers with their funniest
+						white card.</p>
+					<p>The player who asked the question picks the funniest answer, and the player who played that answer wins the
+						round.</p>
 					<p>First player to win 5 rounds wins the game!</p>
 					<button class="btn" data-action="discord">Support Discord</button>
 					<button class="btn" data-action="close">Got it!</button>
@@ -250,7 +252,9 @@
 			<div class="popover credits">
 				<div class="content">
 					<h1>Credits</h1>
-					<p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Perferendis eius rem quas unde suscipit a reiciendis ut corrupti vitae quos iure soluta, quod, sit dignissimos expedita fugiat aut nihil doloremque!</p>
+					<p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Perferendis eius rem quas unde suscipit a
+						reiciendis ut corrupti vitae quos iure soluta, quod, sit dignissimos expedita fugiat aut nihil doloremque!
+					</p>
 					<button class="btn" data-action="discord">Support Discord</button>
 					<button class="btn" data-action="close">Got it!</button>
 				</div>
@@ -322,6 +326,9 @@
 		</div>
 		<div class="screen" data-screen="present" data-background="spiral">
 			<h1>PRESENT</h1>
+			<div class="prompt"></div>
+			<div class="white_cards"></div>
+			<button class="btn">CONTINUE</button>
 		</div>
 		<div class="screen" data-screen="winner_pick" data-background="spiral">
 			<h1>WINNER_PICK</h1>
@@ -342,45 +349,45 @@
 	</div>
 	<script type="module" class="destroy_after_load">
 		let loadingTexts = [{
-				"black": "A romantic, candlelit dinner would be incomplete without _.",
-				"white": "Poorly-timed Holocaust jokes."
-			},
-			{
-				"black": "It's a pity that kids these days are all getting involved with _.",
-				"white": "Wearing underwear inside-out to avoid doing laundry."
-			},
-			{
-				"black": "Instead of coal, Santa now gives the bad children _.",
-				"white": "A brain tumor."
-			},
-			{
-				"black": "What am I giving up for Lent?",
-				"white": "Edible underpants."
-			},
-			{
-				"black": "White people like _.",
-				"white": "Pretending to care."
-			},
-			{
-				"black": "What gets better with age?",
-				"white": "Getting naked and watching Nickelodeon."
-			},
-			{
-				"black": "I do not know with which weapons World War III will be fought, but World War IV will be fought with _.",
-				"white": "An erection that lasts longer than four hours."
-			},
-			{
-				"black": "During sex, I like to think about _.",
-				"white": "Cards Against Humanity."
-			},
-			{
-				"black": "What's that sound?",
-				"white": "My vagina."
-			},
-			{
-				"black": "Daddy, why is Mommy crying?",
-				"white": "Crystal meth."
-			}
+			"black": "A romantic, candlelit dinner would be incomplete without _.",
+			"white": "Poorly-timed Holocaust jokes."
+		},
+		{
+			"black": "It's a pity that kids these days are all getting involved with _.",
+			"white": "Wearing underwear inside-out to avoid doing laundry."
+		},
+		{
+			"black": "Instead of coal, Santa now gives the bad children _.",
+			"white": "A brain tumor."
+		},
+		{
+			"black": "What am I giving up for Lent?",
+			"white": "Edible underpants."
+		},
+		{
+			"black": "White people like _.",
+			"white": "Pretending to care."
+		},
+		{
+			"black": "What gets better with age?",
+			"white": "Getting naked and watching Nickelodeon."
+		},
+		{
+			"black": "I do not know with which weapons World War III will be fought, but World War IV will be fought with _.",
+			"white": "An erection that lasts longer than four hours."
+		},
+		{
+			"black": "During sex, I like to think about _.",
+			"white": "Cards Against Humanity."
+		},
+		{
+			"black": "What's that sound?",
+			"white": "My vagina."
+		},
+		{
+			"black": "Daddy, why is Mommy crying?",
+			"white": "Crystal meth."
+		}
 		];
 
 		let spinDuration = 10;

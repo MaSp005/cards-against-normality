@@ -98,15 +98,15 @@ io.on("connection", (socket) => {
   let room = getRoom(socket.handshake.query.instanceId, socket);
   socket.emit("GAMESTATE", room.toJSON());
   socket.emit("NEW_VIP", room.vip);
-  console.log(`@${socket.user.username} connected`);
+  room.print(`@${socket.user.username} connected`);
   room.refreshClient(socket);
 
   socket.on("disconnect", () => {
-    console.log(`@${socket.user.username} disconnected`);
+    room.print(`@${socket.user.username} disconnected`);
     socket.leave(room.name);
     if (!io.sockets.adapter.rooms.get(room.name)?.size) {
       delete rooms[socket.handshake.query.instanceId];
-      console.log(`-> Room ${room.name} deleted.`);
+      room.print(`-> Room deleted.`);
       return;
     }
     if (room.vip == socket.user.id) {
@@ -118,7 +118,7 @@ io.on("connection", (socket) => {
           let min = Math.min(...clients.map((c) => c.connected));
           let newvip = clients.find((c) => c.connected == min);
           room.setVIP(newvip);
-          console.log(`-> Made @${newvip.user.username} new VIP.`);
+          room.print(`-> Made @${newvip.user.username} new VIP.`);
         });
     }
   });

@@ -172,6 +172,11 @@ setupDiscordSdk().then(async () => {
 
   $('.screen[data-screen="card_preview"] button').click(() => {
     socket.emit("CONTINUE");
+    $('.screen[data-screen="card_preview"] button').attr("disabled", true);
+  });
+
+  $('.screen[data-screen="present"] button').on("click", () => {
+    socket.emit("CONTINUE")
   });
 
   // SOCKET EVENTS
@@ -239,8 +244,11 @@ setupDiscordSdk().then(async () => {
 
       // TODO: dragging system
       // clicking should place at first empty spot, or last spot
-      // dragging into occupied spot should shove existing one back into white deck
+      // dragging into occupied spot should shove existing one back into white deck (done)
       $('.screen[data-screen="white_pick"] .prompt').html(
+        buildBlackCard(d.text)
+      );
+      $('.screen[data-screen="present"] .prompt').html(
         buildBlackCard(d.text)
       );
       $('.screen[data-screen="white_pick"] .dropoff').html(
@@ -275,7 +283,7 @@ setupDiscordSdk().then(async () => {
         });
       });
 
-      // TODO: work out selected cards
+      // TODO: finish button & timeout
       function finish() {
         socket.emit(
           "WHITE_ANSWER",
@@ -381,16 +389,13 @@ function updateParticipants(participants) {
     ...participants.map((p) => {
       // format: {id: '439490179968008194', username: 'masp.', global_name: 'Masp'}
       let el = document.createElement("div");
-      el.style.backgroundImage = `url(${
-        p.avatar
-          ? // ? `https://cdn.discordapp.com/avatars/${p.id}/${p.avatar}.png?size=256`
-            `https://cdn.discordapp.com/avatars/${p.id}/${p.avatar}${
-              p.avatar.startsWith("a_") ? ".gif" : ".png"
-            }?size=256`
-          : `https://cdn.discordapp.com/embed/avatars/${
-              (BigInt(p.id) >> 22n) % 6n
-            }.png`
-      })`;
+      el.style.backgroundImage = `url(${p.avatar
+        ? // ? `https://cdn.discordapp.com/avatars/${p.id}/${p.avatar}.png?size=256`
+        `https://cdn.discordapp.com/avatars/${p.id}/${p.avatar}${p.avatar.startsWith("a_") ? ".gif" : ".png"
+        }?size=256`
+        : `https://cdn.discordapp.com/embed/avatars/${(BigInt(p.id) >> 22n) % 6n
+        }.png`
+        })`;
       if (p.id == currentvip) el.classList.add("vip");
       el.classList.add("czar");
       el.setAttribute("data-userid", p.id);
@@ -420,14 +425,14 @@ async function goTo(screen, ...data) {
 
   if (screen === currentScreen) return;
 
-  // Animation für das Verstecken der Button Cards beim Verlassen eines Screens
+  // Animate hiding button cards in lobby
   if (currentScreen === "lobby" || currentScreen === "settings") {
     $(
       '.screen[data-screen="' + currentScreen + '"] .popover.tutorial'
     ).removeClass("active");
     await $(`.screen[data-screen="${currentScreen}"] .menu .buttonCard`).each(
       (i, el) => {
-        console.log(i, el.target);
+        // console.log(i, el.target);
         setTimeout(() => {
           $(el).addClass("hidden");
         }, i * 70);
@@ -437,21 +442,25 @@ async function goTo(screen, ...data) {
       setTimeout(
         res,
         $(`.screen[data-screen="${currentScreen}"] .menu .buttonCard`).length *
-          70 +
-          300
+        70 +
+        300
       )
     );
   }
 
-  // Button Cards im neuen Bildschirm erst mal verstecken
+  // Activate Continue button in card preview
+  if (screen == "card_preview")
+    $('.screen[data-screen="card_preview"] button').attr("disabled", false);
+
+  // Hide Button Cards in new screen
   $(`.screen[data-screen=${screen}] .menu .buttonCard`).addClass("hidden");
 
-  // Nach einem kleinen Delay die Button Cards wieder anzeigen
+  // Show Button Cards after short delay
   setTimeout(() => {
     $(`.screen[data-screen=${screen}] .menu .buttonCard`).removeClass("hidden");
   }, 100); // Hier ist der Delay für das Aufpoppen
 
-  // Entfernen der Hintergründe, die mit bge- anfangen
+  // Remove backgrounds starting with "bge-"
   let classList = Array.from($("#app")[0].classList);
   classList.forEach((x) => {
     if (x.startsWith("bge-")) {
@@ -463,8 +472,8 @@ async function goTo(screen, ...data) {
   $("#app").addClass(
     `bge-${$(".screen[data-screen=" + screen + "]").attr("data-background")}`
   );
-  
-  // Deaktivieren der aktuellen Ansicht und Aktivieren des neuen Screens
+
+  // Deactivate current screen, activate new screen
   $(`.screen:not([data-screen=${screen}])`).removeClass("active");
   $(`.screen[data-screen="${screen.toLowerCase()}"]`).addClass("active");
 }
